@@ -5,6 +5,8 @@ import scipy.sparse as sp
 import torch
 from tqdm import tqdm
 
+from mamex_robustness.domain.noise import CorruptionSpec, TextNoiseSimulator
+
 
 class Loader4MM(torch.utils.data.Dataset):
     def __init__(self, env):
@@ -106,6 +108,18 @@ class Loader4MM(torch.utils.data.Dataset):
         self.cold_item_index = np.load(os.path.join(self.env.DATA_PATH, 'cold_item_index.npy'))
         self.warm_item_index = np.setdiff1d(all_item_index, self.cold_item_index, assume_unique=False)
 
+        # optional ablation: warm items whose training interactions are removed (they stay in the item set, so they appear as
+        # negatives like the cold items do); allPos and the validation and test data are unchanged
+        self.heldout_warm_index = np.array([], dtype=int)
+        holdout = float(getattr(self.env.args, 'holdout_warm', 0.0))
+        if holdout > 0:
+            rng = np.random.default_rng(int(getattr(self.env.args, 'holdout_seed', 0)))
+            count = int(round(holdout * len(self.warm_item_index)))
+            self.heldout_warm_index = np.sort(rng.choice(self.warm_item_index, size=count, replace=False))
+            dropped = set(self.heldout_warm_index.tolist())
+            for user in list(self.train_data.keys()):
+                self.train_data[user] = [i for i in self.train_data[user] if i not in dropped]
+
         self.image_feat, self.text_feat, self.audio_feat = self.load_mutimedia_feature()
         self.feature = np.concatenate([self.image_feat, self.text_feat], axis=1)
         if self.env.args.dataset == 'tiktok':
@@ -134,10 +148,25 @@ class Loader4MM(torch.utils.data.Dataset):
             return image_feat, text_feat, None
 
 
+    def noisy_text_feat(self, noise_rate, noise_type='hashtag', seed=2025):
+        """Corrupted copy of text_feat; only cold items are touched, self.text_feat is unchanged."""
+        simulator = TextNoiseSimulator(CorruptionSpec(noise_rate, noise_type, seed))
+        return simulator(self.text_feat, self.cold_item_index, self.warm_item_index)
+
+    def train_noisy_text_feat(self, noise_rate, noise_type='hashtag', seed=2025, proto_items=None):
+        """Corrupted copy of text_feat for noise-augmented training: only warm items are touched."""
+        simulator = TextNoiseSimulator(CorruptionSpec(noise_rate, noise_type, seed))
+        return simulator(self.text_feat, self.warm_item_index, self.warm_item_index, proto_items)
+
+    def train_noisy_image_feat(self, noise_rate, noise_type='hashtag', seed=2025):
+        """Same corruption applied to the image features of warm items (ablation of the augmentation design)."""
+        simulator = TextNoiseSimulator(CorruptionSpec(noise_rate, noise_type, seed))
+        return simulator(self.image_feat, self.warm_item_index, self.warm_item_index)
+
     def getUserAllItems(self):
         """
-        得到训练集和验证集中用户交互过的item
-        用于负采样
+        Get the items each user interacted with in the training and validation sets
+        Used for negative sampling
         """
         posItems = defaultdict(list)
 

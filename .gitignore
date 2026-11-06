@@ -1,0 +1,22 @@
+__pycache__/
+*.pyc
+*.npy
+*.pth
+exp_report/
+baby/
+.env*
+.pytest_cache/
+*.egg-info/
+processed_data_baby/
+*.pt
+docs/presentation_outline.md
+demo_out/
+demo_out.log
+
+# kept locally only, not published
+docs/report/*.tex
+docs/ai_use.md
+docs/hypotheses_log.md
+Karabunar_YZM5110_Research.pdf
+YZM5110_Research_Project.pdf
+docs/presentation_source.md

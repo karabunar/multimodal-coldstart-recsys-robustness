@@ -1,0 +1,171 @@
+import argparse
+import json
+import os
+import time
+
+import numpy as np
+import torch
+
+from mamex_robustness import tool
+from mamex_robustness.application.environment import Env
+from mamex_robustness.application.session import Session
+from mamex_robustness.data.loader import Loader4MM
+from mamex_robustness.models.mamex import MOME_model
+
+
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(description="MAMEX robustness study")
+
+    # ----------------------- Experiment mode
+    parser.add_argument('--mode', choices=['baseline', 'stress_test', 'improved'], default='baseline')
+    parser.add_argument('--noise_rate', type=float, default=0.4)
+    parser.add_argument('--noise_type', choices=['hashtag', 'shuffle', 'gaussian'], default='hashtag')
+    parser.add_argument('--noise_seed', type=int, default=None)
+    parser.add_argument('--use_vgr', type=int, default=None)
+    parser.add_argument('--train_with_vgr', type=int, default=0,
+                        help='1 = also apply VGR during training (ablation); default trains clean and applies VGR at evaluation')
+    parser.add_argument('--train_noise_rate', type=float, default=0.0,
+                        help='ablation: corrupt this share of warm items\' text (--noise_type) in every training epoch; '
+                             'validation and model selection stay clean; 0 = train on clean text')
+    parser.add_argument('--train_noise_type', choices=['hashtag', 'shuffle', 'gaussian'], default=None,
+                        help='ablation: corruption type of --train_noise_rate (default: --noise_type)')
+    parser.add_argument('--train_fixed_prototypes', type=int, default=0,
+                        help='ablation: 1 = hashtag training noise uses the prototypes of the evaluation mask in every epoch')
+    parser.add_argument('--train_image_noise_rate', type=float, default=0.0,
+                        help='ablation: corrupt this share of warm items\' image features (hashtag mixing with image prototypes) in every training epoch')
+    parser.add_argument('--gate_probe', type=int, default=0,
+                        help='1 = also report the mean gate weights on warm items split by a training-style corruption (rate --noise_rate)')
+    parser.add_argument('--save_final', type=int, default=0,
+                        help='1 = write the best-validation weights to <results_dir>/checkpoints/<result name>.pt after training')
+    parser.add_argument('--curve', type=int, default=0,
+                        help='1 = record validation and test metrics at every evaluation epoch (<results_dir>/curves/<result name>.json); does not change training or selection')
+    parser.add_argument('--holdout_warm', type=float, default=0.0,
+                        help='ablation: remove the training interactions of this share of the warm items (they stay in the item set); with --holdout_probe 1 the gate is read on them')
+    parser.add_argument('--holdout_seed', type=int, default=0)
+    parser.add_argument('--holdout_probe', type=int, default=0)
+    parser.add_argument('--repr_probe', type=int, default=0,
+                        help='1 = also report where cold items sit relative to warm items in the space the gate reads')
+    parser.add_argument('--warm_only_aux', type=int, default=0,
+                        help='1: cold items stay out of the alignment, expert-balance and gate-balance losses during training (H38)')
+    parser.add_argument('--vgr_gamma', type=float, default=8.0)
+    parser.add_argument('--gamma_grid', type=float, nargs='+', default=None,
+                        help='select vgr_gamma on noisy validation data from these values')
+    parser.add_argument('--vgr_control', choices=['cosine', 'shuffled', 'constant'], default='cosine')
+    parser.add_argument('--vgr_control_scope', choices=['cold', 'all'], default='cold',
+                        help="items among which the shuffled / constant controls permute / average the factor ('all' = earlier runs)")
+    parser.add_argument('--results_dir', type=str, default='results')
+    parser.add_argument('--data_path', type=str, default='baby')
+
+    # ----------------------- File Identification
+    parser.add_argument('--suffix', type=str, default='default')
+
+    # ----------------------- Device Setting
+    parser.add_argument('--use_gpu', type=int, default=1)
+    parser.add_argument('--device_id', type=int, default=0)
+    parser.add_argument('--seed', type=int, default=2025)
+    parser.add_argument('--ckpt', type=str, default=None)
+    parser.add_argument('--ckpt_start_epoch', type=int, default=0)
+
+    # ------------------------ Training Setting
+    parser.add_argument('--free_emb_dimension', type=int, default=128)
+    parser.add_argument('--lr', type=float, default=0.001)
+    parser.add_argument('--epoch', type=int, default=1000)
+    parser.add_argument('--eva_interval', type=int, default=10)
+    parser.add_argument('--neg_num', type=int, default=1)
+    parser.add_argument('--batch_size', type=int, default=2048)
+    parser.add_argument('--early_stop', type=int, default=200)
+    parser.add_argument('--topk', type=int, nargs='+', default=[10, 20, 30, 40, 50])
+    parser.add_argument('--dataset', type=str, default='baby')
+
+    # ----------------------- Regularizer coefficient
+    parser.add_argument('--reg_coeff', type=float, default=1e-6)
+    parser.add_argument('--penalty_coeff', type=float, default=50) 
+    parser.add_argument('--align_coeff', type=float, default=1) 
+    parser.add_argument('--moe_balance_coeff', type=float, default=1) 
+    parser.add_argument('--fusion_balance_coeff', type=float, default=1) 
+
+
+    # ----------------------- logger
+    parser.add_argument('--log', type=int, default=0)
+    parser.add_argument('--tensorboard', type=int, default=0)
+    parser.add_argument('--save', type=int, default=0)
+
+    return parser.parse_args(argv)
+
+
+
+def main(argv=None):
+    # ----------------------------------- Env Init -----------------------------------------------------------
+    tool.cprint('Init Env')
+    args = tool.apply_mode_defaults(parse_args(argv))
+    my_env = Env(args)
+    tool.cprint(f'---------- {my_env.args.suffix} ----------')
+    print(f'{my_env.args}')
+
+    # ----------------------------------- Dataset Init -----------------------------------------------------------
+
+    my_loader = Loader4MM(my_env)
+
+    tool.cprint('Init Dataset')
+
+    # ----------------------------------- Model Init -----------------------------------------------------------
+
+    my_model = MOME_model(my_env, my_loader)
+    if args.ckpt != None:
+        my_model.load_state_dict(torch.load(args.ckpt, map_location='cpu'))
+    tool.cprint('Init Model')
+
+    # ----------------------------------- Session Init -----------------------------------------------------------
+
+    my_session = Session(my_env, my_model, my_loader)
+    tool.cprint('Init Session')
+
+    # ---------------------------------------- Main -----------------------------------------------------------
+
+    t = time.time()
+    my_session.train(my_env.args.epoch)
+    # my_session.save_memory()
+    # my_env.close_env()
+    train_seconds = time.time() - t
+    tool.cprint(f'training stage cost time: {train_seconds}')
+    if my_env.args.log:
+        my_env.test_logger.info(f'--------- {my_env.args.suffix} best epoch {my_session.best_epoch}------------')
+
+    tool.cprint(f'--------- {my_env.args.suffix} best epoch {my_session.best_epoch}------------')
+    for top_k in args.topk:
+        tool.cprint(f'hr@{top_k} = {my_session.test_hr[top_k]:.5f}, recall@{top_k} = {my_session.test_recall[top_k]:.5f}, ndcg@{top_k} = {my_session.test_ndcg[top_k]:.5f}')
+        if my_env.args.log:
+            my_env.test_logger.info(f'hr@{top_k} = {my_session.test_hr[top_k]:.5f}, recall@{top_k} = {my_session.test_recall[top_k]:.5f}, ndcg@{top_k} = {my_session.test_ndcg[top_k]:.5f}')
+
+    report = my_session.final_report(args.noise_rate, args.noise_type, args.noise_seed, args.gamma_grid)
+    if args.gate_probe:
+        report['gate_probe'] = my_session.gate_probe(args.noise_rate, args.noise_type, args.noise_seed)
+    if args.repr_probe:
+        report['repr_probe'] = my_session.representation_probe()
+    if args.holdout_probe:
+        report['holdout_probe'] = my_session.holdout_probe()
+    if 'gamma_selection' in report:
+        args.vgr_gamma = report['gamma_selection']['selected']
+    gamma_tag = 'sel' if args.gamma_grid else str(args.vgr_gamma)
+    result_name = f'{args.mode}_{args.noise_type}_r{args.noise_rate:.2f}_g{gamma_tag}_seed{args.seed}'
+    if args.suffix != 'default':
+        result_name += f'_{args.suffix}'
+    os.makedirs(args.results_dir, exist_ok=True)
+    result_path = os.path.join(args.results_dir, result_name + '.json')
+    with open(result_path, 'w') as f:
+        json.dump({'args': vars(args), 'report': report, 'best_epoch': my_session.best_epoch,
+                   'train_seconds': train_seconds}, f, indent=2)
+    if args.curve:
+        os.makedirs(os.path.join(args.results_dir, 'curves'), exist_ok=True)
+        with open(os.path.join(args.results_dir, 'curves', result_name + '.json'), 'w') as f:
+            json.dump({'best_epoch': my_session.best_epoch, 'curve': my_session.curve}, f)
+    if args.save_final:
+        ckpt_path = os.path.join(args.results_dir, 'checkpoints', result_name + '.pt')
+        my_session.save_best(ckpt_path)
+        tool.cprint(f'checkpoint written to {ckpt_path}')
+    diag = my_session.diagnostics(args.noise_rate, args.noise_type, args.noise_seed)
+    diag_dir = os.path.join(args.results_dir, 'diagnostics')
+    os.makedirs(diag_dir, exist_ok=True)
+    np.savez_compressed(os.path.join(diag_dir, result_name + '.npz'), users=diag['users'], items=diag['items'],
+                        corrupted_items=diag['corrupted_items'], **{f'ranks_{k}': v for k, v in diag['ranks'].items()})
+    tool.cprint(f'results written to {result_path}')
