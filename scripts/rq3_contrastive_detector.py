@@ -1,4 +1,4 @@
-"""H43: a contrastive image-text detector for the warm-only models (docs/hypotheses.md).
+"""Hypothesis 5: a contrastive image-text detector for the warm-only models (docs/hypotheses.md).
 
 Usage: PYTHONPATH=src python scripts/rq3_contrastive_detector.py 2025 2026 ...   (writes results/rq3_contrastive_detector.json and .md)
 Models: results/rq3_warm_only/checkpoints. Detector: two MLP towers trained with InfoNCE on warm items only (clean text).
