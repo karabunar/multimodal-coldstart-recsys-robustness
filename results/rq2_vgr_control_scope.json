@@ -1,0 +1,422 @@
+{
+ "2025": {
+  "all": {
+   "noisy": 0.06665443031921932,
+   "noisy_vgr": 0.07100390618864937,
+   "noisy_vgr_shuffled": 0.06916602190375343,
+   "noisy_vgr_constant": 0.069022810141294,
+   "ndcg20": {
+    "noisy": 0.029712232407060328,
+    "noisy_vgr": 0.031517361265101074,
+    "noisy_vgr_shuffled": 0.030657216516125217,
+    "noisy_vgr_constant": 0.030620173344794017
+   },
+   "gamma": 1.0
+  },
+  "cold": {
+   "noisy": 0.06665443031921932,
+   "noisy_vgr": 0.07100390618864937,
+   "noisy_vgr_shuffled": 0.06945642353318503,
+   "noisy_vgr_constant": 0.0706140519463987,
+   "ndcg20": {
+    "noisy": 0.029712232407060328,
+    "noisy_vgr": 0.031517361265101074,
+    "noisy_vgr_shuffled": 0.030919387897680204,
+    "noisy_vgr_constant": 0.03108892552590523
+   },
+   "gamma": 1.0
+  }
+ },
+ "2026": {
+  "all": {
+   "noisy": 0.06516802103970329,
+   "noisy_vgr": 0.06743247178849623,
+   "noisy_vgr_shuffled": 0.06628279958430808,
+   "noisy_vgr_constant": 0.06627484337528254,
+   "ndcg20": {
+    "noisy": 0.030037483638325157,
+    "noisy_vgr": 0.030857532732488226,
+    "noisy_vgr_shuffled": 0.03033037407154632,
+    "noisy_vgr_constant": 0.03028139178491748
+   },
+   "gamma": 1.0
+  },
+  "cold": {
+   "noisy": 0.06516802103970329,
+   "noisy_vgr": 0.06743247178849623,
+   "noisy_vgr_shuffled": 0.0659486388052361,
+   "noisy_vgr_constant": 0.06627006964986723,
+   "ndcg20": {
+    "noisy": 0.030037483638325157,
+    "noisy_vgr": 0.030857532732488226,
+    "noisy_vgr_shuffled": 0.03024935517449442,
+    "noisy_vgr_constant": 0.030264398477326093
+   },
+   "gamma": 1.0
+  }
+ },
+ "2027": {
+  "all": {
+   "noisy": 0.06849670257394144,
+   "noisy_vgr": 0.0719138943504038,
+   "noisy_vgr_shuffled": 0.06985721431730596,
+   "noisy_vgr_constant": 0.06951032360379314,
+   "ndcg20": {
+    "noisy": 0.032366451624756445,
+    "noisy_vgr": 0.03343224650828647,
+    "noisy_vgr_shuffled": 0.03277476059874667,
+    "noisy_vgr_constant": 0.03263598537176639
+   },
+   "gamma": 1.0
+  },
+  "cold": {
+   "noisy": 0.06849670257394144,
+   "noisy_vgr": 0.0719138943504038,
+   "noisy_vgr_shuffled": 0.07127580638655681,
+   "noisy_vgr_constant": 0.06995746255102757,
+   "ndcg20": {
+    "noisy": 0.032366451624756445,
+    "noisy_vgr": 0.03343224650828647,
+    "noisy_vgr_shuffled": 0.03306610677840967,
+    "noisy_vgr_constant": 0.03282935713484722
+   },
+   "gamma": 1.0
+  }
+ },
+ "2028": {
+  "all": {
+   "noisy": 0.06347702008385604,
+   "noisy_vgr": 0.06507053509153948,
+   "noisy_vgr_shuffled": 0.06453519588425069,
+   "noisy_vgr_constant": 0.06426468477738288,
+   "ndcg20": {
+    "noisy": 0.028573877045428648,
+    "noisy_vgr": 0.02929400944049849,
+    "noisy_vgr_shuffled": 0.028987797504259238,
+    "noisy_vgr_constant": 0.028876091924161285
+   },
+   "gamma": 2.0
+  },
+  "cold": {
+   "noisy": 0.06347702008385604,
+   "noisy_vgr": 0.06507053509153948,
+   "noisy_vgr_shuffled": 0.06540817561917428,
+   "noisy_vgr_constant": 0.06428855340445945,
+   "ndcg20": {
+    "noisy": 0.028573877045428648,
+    "noisy_vgr": 0.02929400944049849,
+    "noisy_vgr_shuffled": 0.029290678888382486,
+    "noisy_vgr_constant": 0.02884531561613163
+   },
+   "gamma": 2.0
+  }
+ },
+ "2029": {
+  "all": {
+   "noisy": 0.06646367656487955,
+   "noisy_vgr": 0.06894142604472946,
+   "noisy_vgr_shuffled": 0.06727361864367784,
+   "noisy_vgr_constant": 0.06756799837762222,
+   "ndcg20": {
+    "noisy": 0.03000572512426581,
+    "noisy_vgr": 0.031044246568988583,
+    "noisy_vgr_shuffled": 0.03023815198867985,
+    "noisy_vgr_constant": 0.030314888164709283
+   },
+   "gamma": 2.0
+  },
+  "cold": {
+   "noisy": 0.06646367656487955,
+   "noisy_vgr": 0.06894142604472946,
+   "noisy_vgr_shuffled": 0.06830883509802738,
+   "noisy_vgr_constant": 0.06795307889445754,
+   "ndcg20": {
+    "noisy": 0.03000572512426581,
+    "noisy_vgr": 0.031044246568988583,
+    "noisy_vgr_shuffled": 0.03077299642930258,
+    "noisy_vgr_constant": 0.03058098742776735
+   },
+   "gamma": 2.0
+  }
+ },
+ "2030": {
+  "all": {
+   "noisy": 0.07209502488049366,
+   "noisy_vgr": 0.07487492431401158,
+   "noisy_vgr_shuffled": 0.07329641244334771,
+   "noisy_vgr_constant": 0.07293042682817362,
+   "ndcg20": {
+    "noisy": 0.03233434585907544,
+    "noisy_vgr": 0.0332231244391655,
+    "noisy_vgr_shuffled": 0.032754900451484346,
+    "noisy_vgr_constant": 0.03261331724013529
+   },
+   "gamma": 2.0
+  },
+  "cold": {
+   "noisy": 0.07209502488049366,
+   "noisy_vgr": 0.07487492431401158,
+   "noisy_vgr_shuffled": 0.07275607219038573,
+   "noisy_vgr_constant": 0.07334505897853234,
+   "ndcg20": {
+    "noisy": 0.03233434585907544,
+    "noisy_vgr": 0.0332231244391655,
+    "noisy_vgr_shuffled": 0.03279909991908284,
+    "noisy_vgr_constant": 0.03268403211997345
+   },
+   "gamma": 2.0
+  }
+ },
+ "2031": {
+  "all": {
+   "noisy": 0.06196538064019446,
+   "noisy_vgr": 0.0660967747801813,
+   "noisy_vgr_shuffled": 0.0640069438761438,
+   "noisy_vgr_constant": 0.06364891446999524,
+   "ndcg20": {
+    "noisy": 0.028627835226224387,
+    "noisy_vgr": 0.03011873991636363,
+    "noisy_vgr_shuffled": 0.029438184120421044,
+    "noisy_vgr_constant": 0.029362096406145687
+   },
+   "gamma": 1.0
+  },
+  "cold": {
+   "noisy": 0.06196538064019446,
+   "noisy_vgr": 0.0660967747801813,
+   "noisy_vgr_shuffled": 0.06461957197110911,
+   "noisy_vgr_constant": 0.06422176151983293,
+   "ndcg20": {
+    "noisy": 0.028627835226224387,
+    "noisy_vgr": 0.03011873991636363,
+    "noisy_vgr_shuffled": 0.029578067045432276,
+    "noisy_vgr_constant": 0.02962803233578535
+   },
+   "gamma": 1.0
+  }
+ },
+ "2032": {
+  "all": {
+   "noisy": 0.0695281338015728,
+   "noisy_vgr": 0.07275706651780739,
+   "noisy_vgr_shuffled": 0.07065912785790579,
+   "noisy_vgr_constant": 0.07055001413412718,
+   "ndcg20": {
+    "noisy": 0.032149637275778194,
+    "noisy_vgr": 0.03311205961259069,
+    "noisy_vgr_shuffled": 0.032404808083539224,
+    "noisy_vgr_constant": 0.032389837063282835
+   },
+   "gamma": 1.0
+  },
+  "cold": {
+   "noisy": 0.0695281338015728,
+   "noisy_vgr": 0.07275706651780739,
+   "noisy_vgr_shuffled": 0.07159780897607898,
+   "noisy_vgr_constant": 0.07143315333596029,
+   "ndcg20": {
+    "noisy": 0.032149637275778194,
+    "noisy_vgr": 0.03311205961259069,
+    "noisy_vgr_shuffled": 0.032798808453910366,
+    "noisy_vgr_constant": 0.032600503889210125
+   },
+   "gamma": 1.0
+  }
+ },
+ "2033": {
+  "all": {
+   "noisy": 0.06520283203737472,
+   "noisy_vgr": 0.06900658191234857,
+   "noisy_vgr_shuffled": 0.06723393854146192,
+   "noisy_vgr_constant": 0.06690773397141546,
+   "ndcg20": {
+    "noisy": 0.031193265986029325,
+    "noisy_vgr": 0.032361727575940885,
+    "noisy_vgr_shuffled": 0.031756156305614174,
+    "noisy_vgr_constant": 0.03163839809203034
+   },
+   "gamma": 1.0
+  },
+  "cold": {
+   "noisy": 0.06520283203737472,
+   "noisy_vgr": 0.06900658191234857,
+   "noisy_vgr_shuffled": 0.06703116887144002,
+   "noisy_vgr_constant": 0.06766675631245041,
+   "ndcg20": {
+    "noisy": 0.031193265986029325,
+    "noisy_vgr": 0.032361727575940885,
+    "noisy_vgr_shuffled": 0.03154350905412415,
+    "noisy_vgr_constant": 0.03186735137330386
+   },
+   "gamma": 1.0
+  }
+ },
+ "2034": {
+  "all": {
+   "noisy": 0.06896361838361074,
+   "noisy_vgr": 0.07077138273433861,
+   "noisy_vgr_shuffled": 0.0693415383123231,
+   "noisy_vgr_constant": 0.06925799811755512,
+   "ndcg20": {
+    "noisy": 0.031978341667668934,
+    "noisy_vgr": 0.03263420369342183,
+    "noisy_vgr_shuffled": 0.032204478778397716,
+    "noisy_vgr_constant": 0.032147318614645315
+   },
+   "gamma": 1.0
+  },
+  "cold": {
+   "noisy": 0.06896361838361074,
+   "noisy_vgr": 0.07077138273433861,
+   "noisy_vgr_shuffled": 0.06970275020208187,
+   "noisy_vgr_constant": 0.06974730497262481,
+   "ndcg20": {
+    "noisy": 0.031978341667668934,
+    "noisy_vgr": 0.03263420369342183,
+    "noisy_vgr_shuffled": 0.032083151652650424,
+    "noisy_vgr_constant": 0.03234865308370499
+   },
+   "gamma": 1.0
+  }
+ },
+ "2035": {
+  "all": {
+   "noisy": 0.07054720707336709,
+   "noisy_vgr": 0.0720429743701655,
+   "noisy_vgr_shuffled": 0.07067928014319078,
+   "noisy_vgr_constant": 0.0706235866800121,
+   "ndcg20": {
+    "noisy": 0.03288998178915873,
+    "noisy_vgr": 0.0335086132696917,
+    "noisy_vgr_shuffled": 0.03316660165915605,
+    "noisy_vgr_constant": 0.03308016270463332
+   },
+   "gamma": 2.0
+  },
+  "cold": {
+   "noisy": 0.07054720707336709,
+   "noisy_vgr": 0.0720429743701655,
+   "noisy_vgr_shuffled": 0.07161652156639745,
+   "noisy_vgr_constant": 0.07086931987877185,
+   "ndcg20": {
+    "noisy": 0.03288998178915873,
+    "noisy_vgr": 0.0335086132696917,
+    "noisy_vgr_shuffled": 0.03339019015865496,
+    "noisy_vgr_constant": 0.03321710385710625
+   },
+   "gamma": 2.0
+  }
+ },
+ "2036": {
+  "all": {
+   "noisy": 0.06488939873272506,
+   "noisy_vgr": 0.06708758562634828,
+   "noisy_vgr_shuffled": 0.06548838761221805,
+   "noisy_vgr_constant": 0.06560545754502217,
+   "ndcg20": {
+    "noisy": 0.030761555384207447,
+    "noisy_vgr": 0.03161420359032481,
+    "noisy_vgr_shuffled": 0.031180139673855498,
+    "noisy_vgr_constant": 0.031175070507654164
+   },
+   "gamma": 1.0
+  },
+  "cold": {
+   "noisy": 0.06488939873272506,
+   "noisy_vgr": 0.06708758562634828,
+   "noisy_vgr_shuffled": 0.06638925779416519,
+   "noisy_vgr_constant": 0.06609556002099443,
+   "ndcg20": {
+    "noisy": 0.030761555384207447,
+    "noisy_vgr": 0.03161420359032481,
+    "noisy_vgr_shuffled": 0.03153338662018133,
+    "noisy_vgr_constant": 0.03143546909625814
+   },
+   "gamma": 1.0
+  }
+ },
+ "2037": {
+  "all": {
+   "noisy": 0.0686387112346631,
+   "noisy_vgr": 0.07152772439195963,
+   "noisy_vgr_shuffled": 0.06927043423128969,
+   "noisy_vgr_constant": 0.06942160220277462,
+   "ndcg20": {
+    "noisy": 0.031890784424011415,
+    "noisy_vgr": 0.032978999194182235,
+    "noisy_vgr_shuffled": 0.032079233670992253,
+    "noisy_vgr_constant": 0.03210058587888515
+   },
+   "gamma": 2.0
+  },
+  "cold": {
+   "noisy": 0.0686387112346631,
+   "noisy_vgr": 0.07152772439195963,
+   "noisy_vgr_shuffled": 0.06939773357569805,
+   "noisy_vgr_constant": 0.07047409499672246,
+   "ndcg20": {
+    "noisy": 0.031890784424011415,
+    "noisy_vgr": 0.032978999194182235,
+    "noisy_vgr_shuffled": 0.03204272282966546,
+    "noisy_vgr_constant": 0.03236193240679084
+   },
+   "gamma": 2.0
+  }
+ },
+ "2038": {
+  "all": {
+   "noisy": 0.06968725453783693,
+   "noisy_vgr": 0.07111141595340566,
+   "noisy_vgr_shuffled": 0.07049878785844034,
+   "noisy_vgr_constant": 0.06996253937012004,
+   "ndcg20": {
+    "noisy": 0.032233471157282395,
+    "noisy_vgr": 0.03282919203807722,
+    "noisy_vgr_shuffled": 0.032576134006588965,
+    "noisy_vgr_constant": 0.03240057759116832
+   },
+   "gamma": 1.0
+  },
+  "cold": {
+   "noisy": 0.06968725453783693,
+   "noisy_vgr": 0.07111141595340566,
+   "noisy_vgr_shuffled": 0.0702782872083044,
+   "noisy_vgr_constant": 0.07030692956079629,
+   "ndcg20": {
+    "noisy": 0.032233471157282395,
+    "noisy_vgr": 0.03282919203807722,
+    "noisy_vgr_shuffled": 0.03242895249587716,
+    "noisy_vgr_constant": 0.03250580335042053
+   },
+   "gamma": 1.0
+  }
+ },
+ "2039": {
+  "all": {
+   "noisy": 0.07433769659996507,
+   "noisy_vgr": 0.07560909880224372,
+   "noisy_vgr_shuffled": 0.07498055828922737,
+   "noisy_vgr_constant": 0.07482939031774243,
+   "ndcg20": {
+    "noisy": 0.03517492943530737,
+    "noisy_vgr": 0.03532705703860348,
+    "noisy_vgr_shuffled": 0.0350562768461034,
+    "noisy_vgr_constant": 0.03500814244402285
+   },
+   "gamma": 1.0
+  },
+  "cold": {
+   "noisy": 0.07433769659996507,
+   "noisy_vgr": 0.07560909880224372,
+   "noisy_vgr_shuffled": 0.07579686533524609,
+   "noisy_vgr_constant": 0.07513081697968083,
+   "ndcg20": {
+    "noisy": 0.03517492943530737,
+    "noisy_vgr": 0.03532705703860348,
+    "noisy_vgr_shuffled": 0.03516788668135435,
+    "noisy_vgr_constant": 0.03506618722272239
+   },
+   "gamma": 1.0
+  }
+ }
+}

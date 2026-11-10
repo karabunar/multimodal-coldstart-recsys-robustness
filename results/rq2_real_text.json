@@ -1,0 +1,42 @@
+{
+  "n_items": 7050,
+  "n_subset": 3443,
+  "n_cold": 1410,
+  "n_cold_in_subset": 698,
+  "n_warm_in_subset": 2745,
+  "overlap_at_10": {
+    "T title": 0.19619517862329364,
+    "P title+features+description": 0.2466744118501307,
+    "R reviews (2014)": 0.18652338077258207,
+    "permuted control (P)": 0.0032529770548939876,
+    "chance": 0.002905287623474724
+  },
+  "source_tests": {
+    "a_P_over_R": 1.3224852071005915,
+    "b_P_minus_T": 0.05047923322683706,
+    "c_best": 0.2466744118501307,
+    "c_control": 0.0032529770548939876
+  },
+  "premise": {
+    "image": {
+      "title_similarity": 0.11812490690626617,
+      "same_category_share": 0.5101274721699318,
+      "kept_per_item": 5.617478510028653
+    },
+    "text": {
+      "title_similarity": 0.17765035218143416,
+      "same_category_share": 0.6839105339105339,
+      "kept_per_item": 5.846704871060172
+    },
+    "random reference (20 draws)": {
+      "title_similarity": 0.01434638426367861,
+      "same_category_share": 0.14633052200472024
+    }
+  },
+  "ratios": {
+    "a_title_image_over_random": 8.233775475074117,
+    "b_category_image_over_random": 3.4861317050005223,
+    "c_text_minus_image_title": 0.05952544527516798
+  },
+  "n_cat2_items": 3353
+}

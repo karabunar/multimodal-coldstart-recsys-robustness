@@ -1,0 +1,103 @@
+{
+  "args": {
+    "mode": "stress_test",
+    "noise_rate": 0.4,
+    "noise_type": "hashtag",
+    "noise_strength": 0.8,
+    "real_proto_file": null,
+    "noise_seed": 2030,
+    "use_vgr": 0,
+    "train_with_vgr": 0,
+    "train_noise_rate": 0.0,
+    "train_noise_type": null,
+    "train_fixed_prototypes": 0,
+    "train_image_noise_rate": 0.0,
+    "gate_probe": 0,
+    "save_final": 0,
+    "curve": 0,
+    "holdout_warm": 0.0,
+    "holdout_seed": 0,
+    "holdout_probe": 0,
+    "repr_probe": 0,
+    "warm_only_aux": 0,
+    "vgr_gamma": 8.0,
+    "gamma_grid": null,
+    "vgr_control": "cosine",
+    "vgr_control_scope": "cold",
+    "results_dir": "results",
+    "data_path": "processed_data_baby/cold",
+    "suffix": "default",
+    "use_gpu": 1,
+    "device_id": 0,
+    "seed": 2030,
+    "ckpt": null,
+    "ckpt_start_epoch": 0,
+    "free_emb_dimension": 128,
+    "lr": 0.001,
+    "epoch": 1000,
+    "eva_interval": 10,
+    "neg_num": 1,
+    "batch_size": 2048,
+    "early_stop": 200,
+    "topk": [
+      10,
+      20,
+      30,
+      40,
+      50
+    ],
+    "dataset": "baby",
+    "reg_coeff": 1e-06,
+    "penalty_coeff": 50,
+    "align_coeff": 1,
+    "moe_balance_coeff": 1,
+    "fusion_balance_coeff": 1,
+    "log": 0,
+    "tensorboard": 0,
+    "save": 0
+  },
+  "checkpoint": "results/ckpt291/checkpoints/baseline_hashtag_r0.00_g8.0_seed2030.pt",
+  "report": {
+    "selection": {
+      "image_only_flagged": {
+        "q": 0.3,
+        "val_ndcg": 0.031189997693747792
+      }
+    },
+    "noisy": {
+      "unrepaired": {
+        "recall": 0.07209502488049366,
+        "ndcg": 0.03233434585907544,
+        "ndcg_select": 0.024482578030194244
+      },
+      "image_only_flagged": {
+        "recall": 0.07876823837058704,
+        "ndcg": 0.03512909641226288,
+        "ndcg_select": 0.02703304970252256
+      },
+      "image_only_all": {
+        "recall": 0.0762811711446426,
+        "ndcg": 0.0344057919386611,
+        "ndcg_select": 0.026166019158695868
+      },
+      "image_only_oracle": {
+        "recall": 0.07930986677167697,
+        "ndcg": 0.03510513709312826,
+        "ndcg_select": 0.026737591606574185
+      }
+    },
+    "clean": {
+      "unrepaired": {
+        "recall": 0.08017402473197775,
+        "ndcg": 0.035548301388318305,
+        "ndcg_select": 0.026919217061861674
+      },
+      "image_only_flagged": {
+        "recall": 0.0771654411190405,
+        "ndcg": 0.03454010640239161,
+        "ndcg_select": 0.025955029091632185
+      }
+    },
+    "n_corrupted_cold": 564
+  }
+}
