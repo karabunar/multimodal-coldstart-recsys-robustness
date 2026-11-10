@@ -1,0 +1,29 @@
+[
+  {
+    "model": "augmented",
+    "seed": 2025,
+    "w_t_cold": 0.9910532236099243,
+    "k5_user_drop": 0.27904951572418213,
+    "k5_random_abs_drop": 0.004650378227233886,
+    "k20_user_drop": 0.3410588502883911,
+    "k20_random_abs_drop": 0.029481983184814452
+  },
+  {
+    "model": "augmented",
+    "seed": 2026,
+    "w_t_cold": 0.981450617313385,
+    "k5_user_drop": 0.15088778734207153,
+    "k5_random_abs_drop": 0.0037528038024902343,
+    "k20_user_drop": 0.21620911359786987,
+    "k20_random_abs_drop": 0.04375964403152466
+  },
+  {
+    "model": "augmented",
+    "seed": 2027,
+    "w_t_cold": 0.9831690788269043,
+    "k5_user_drop": 0.3311973214149475,
+    "k5_random_abs_drop": 0.009327709674835205,
+    "k20_user_drop": 0.4056043028831482,
+    "k20_random_abs_drop": 0.05695059299468994
+  }
+]
