@@ -34,7 +34,7 @@ docs/                   hypotheses.md, reproducibility.md, literature.md, refere
                         reused_components.md, upstream_README.md
 main.py                 entry point (adds src/ to the path)
 ```
-Not tracked: the data (`processed_data_baby/`), checkpoints (`*.pt`) and the demo app.
+Not tracked: the data (`processed_data_baby/`) and checkpoints (`*.pt`).
 
 ## Setup and commands
 See `docs/reproducibility.md` (versions, data checksums, seeds, exact commands). Short form:
