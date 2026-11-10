@@ -48,3 +48,7 @@ For the same flagged cold items the text is dropped and the item is ranked by it
 ## Reproduction check
 
 Epoch rule, candidate set or seed variation explains the Rec@10 gap to the paper: *not supported.* Mean Rec@10 0.0486, 0 of 15 seeds reach the published 0.0512; the gap is systematic and unexplained (`repro_epoch_rule_tables.py`, `repro_rec10_candidates.py`).
+
+## RQ3 follow-up: a contrastive detector for the inductive setting (H43, written 2026-11-10 before any run)
+
+**Hypothesis 43.** In the warm-only models, the detection failure (AUROC 0.72 for VGR's cosine, 0.565 for the ridge detector) is a weakness of those two detectors, not of the features. A small two-tower network trained with an InfoNCE loss on warm items only, on clean text and without knowledge of the noise, scores image-text agreement better; with its score driving the M3 blend, the repair gain rises above the +0.0004 of VGR's cosine. *Supported* only if on fifteen seeds (2025 to 2039) the mean AUROC on the cold items is at least 0.72 and the mean M3 gain at least +0.0015. Controls: VGR's cosine, the ridge score, a random score, the true mask (oracle, +0.0029). Parameters (the blend weight, the quantile and the steepness) are chosen on noisy validation data, the network's early stopping on held-out warm items; the test set is not used. Predictions are in `docs/hypotheses_log.md`.
