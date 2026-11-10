@@ -72,7 +72,7 @@ What was found (details and per-hypothesis outcomes: `docs/hypotheses.md`, table
 - Confirmation: five unused seeds (2040 to 2044), with six predictions fixed beforehand (`results/rq3_confirmation.md`), all hold: M3 0.0762 against noisy 0.0671 and clean 0.0770.
 - An image-only baseline (drop the text of the same flagged items) recovers 79% of the loss against 85% for M3 and 64% for M1; M3 is above it by +0.0005 and keeps clean accuracy (0.0786 against 0.0742 for image-only), `results/rq2_image_only.md`.
 - Real clickbait strings embedded with the identified text encoder (15 seeds, `results/rq2_real_clickbait.md`) give the same picture: loss 14.9%, M3 gain +0.0102, AUROC of the cosine 0.999.
-- The distributed features are LATTICE's, not the CLIP features the paper describes, and the noise is simulated on embeddings, not on real item text.
+- The distributed features are LATTICE's, and the noise is simulated on embeddings, not on real item text.
 
 ## Tests
 `python -m pytest -q` runs the unit and end-to-end tests in a few seconds on CPU, with a tiny synthetic dataset (no real data needed). They cover the noise simulator, VGR gating and controls, evaluation and reporting, the CLI, the upstream behaviour before the restructure, and the training-noise ablation. The tests check the code, not the scientific results.
@@ -113,4 +113,4 @@ I used Claude Code (Anthropic CLI, model Claude Sonnet 5.5) for boilerplate code
 The same disclosure is in the report, section "Use of AI Tools", and in the separate AI usage statement.
 
 ## Credit
-MAMEX paper and code: see "Source paper and code" at the top. Data: Amazon Baby item cold-start split as distributed by the MAMEX authors (features from LATTICE, not CLIP).
+MAMEX paper and code: see "Source paper and code" at the top. Data: Amazon Baby item cold-start split as distributed by the MAMEX authors (features from LATTICE).
