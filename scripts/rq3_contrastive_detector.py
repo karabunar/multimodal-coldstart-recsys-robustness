@@ -25,15 +25,14 @@ def run(seed):
     corrupted = (noisy_test[cold] != data.text_feat[cold]).any(axis=1)
     score_fn = contrastive.fit(data.image_feat[warm], data.text_feat[warm], seed=seed)
     neighbour = repair.neighbor_text(data.image_feat, data.text_feat, warm, cold, k=10)
-    rng = np.random.default_rng(seed)
-    random_fixed = {id(noisy_test): rng.normal(size=len(cold)), id(noisy_val): rng.normal(size=len(cold))}
+    random_score = np.random.default_rng(seed).normal(size=len(cold))  # one fixed random score per seed
 
     def score(method, text):
         if method == 'm3_contrastive':
             return score_fn(data.image_feat[cold], text[cold])
         if method == 'm3_vgr':
             return _vgr_cosine(session, text)[cold]
-        return random_fixed[id(text)]  # m3_random
+        return random_score  # m3_random
 
     def build(method, text, param):
         rows = text[cold]
