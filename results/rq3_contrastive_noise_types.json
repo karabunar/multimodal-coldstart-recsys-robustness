@@ -1,0 +1,257 @@
+{
+ "2025": {
+  "hashtag": {
+   "share": 0.4,
+   "auroc_contrastive": 0.8678889391881696,
+   "auroc_vgr_cosine": 0.6833597404557115
+  },
+  "shuffle": {
+   "share": 0.4,
+   "auroc_contrastive": 0.914095115939842,
+   "auroc_vgr_cosine": 0.8453485740153915
+  },
+  "gaussian": {
+   "share": 0.4,
+   "auroc_contrastive": 0.5053694482168904,
+   "auroc_vgr_cosine": 0.7399401438559429
+  }
+ },
+ "2026": {
+  "hashtag": {
+   "share": 0.4,
+   "auroc_contrastive": 0.8621108093154268,
+   "auroc_vgr_cosine": 0.6355041664570863
+  },
+  "shuffle": {
+   "share": 0.4,
+   "auroc_contrastive": 0.9111358415907986,
+   "auroc_vgr_cosine": 0.8505566453733044
+  },
+  "gaussian": {
+   "share": 0.4,
+   "auroc_contrastive": 0.5023682578005801,
+   "auroc_vgr_cosine": 0.6999291618463189
+  }
+ },
+ "2027": {
+  "hashtag": {
+   "share": 0.4,
+   "auroc_contrastive": 0.8606709924048086,
+   "auroc_vgr_cosine": 0.7629814060325604
+  },
+  "shuffle": {
+   "share": 0.4,
+   "auroc_contrastive": 0.9063280686752846,
+   "auroc_vgr_cosine": 0.8726003051489697
+  },
+  "gaussian": {
+   "share": 0.4,
+   "auroc_contrastive": 0.5204256995791627,
+   "auroc_vgr_cosine": 0.7063800445986955
+  }
+ },
+ "2028": {
+  "hashtag": {
+   "share": 0.4,
+   "auroc_contrastive": 0.8800844189594755,
+   "auroc_vgr_cosine": 0.7408622973358148
+  },
+  "shuffle": {
+   "share": 0.4,
+   "auroc_contrastive": 0.9213968948577369,
+   "auroc_vgr_cosine": 0.8352971010847878
+  },
+  "gaussian": {
+   "share": 0.4,
+   "auroc_contrastive": 0.5504837114162601,
+   "auroc_vgr_cosine": 0.7013878409872072
+  }
+ },
+ "2029": {
+  "hashtag": {
+   "share": 0.4,
+   "auroc_contrastive": 0.8870571567493252,
+   "auroc_vgr_cosine": 0.8195010311352547
+  },
+  "shuffle": {
+   "share": 0.4,
+   "auroc_contrastive": 0.918150495447915,
+   "auroc_vgr_cosine": 0.8373782338245896
+  },
+  "gaussian": {
+   "share": 0.4,
+   "auroc_contrastive": 0.4814877688915715,
+   "auroc_vgr_cosine": 0.7390431400164311
+  }
+ },
+ "2030": {
+  "hashtag": {
+   "share": 0.4,
+   "auroc_contrastive": 0.8446160907399024,
+   "auroc_vgr_cosine": 0.6992920376238619
+  },
+  "shuffle": {
+   "share": 0.4,
+   "auroc_contrastive": 0.905632261958654,
+   "auroc_vgr_cosine": 0.8503910769076002
+  },
+  "gaussian": {
+   "share": 0.4,
+   "auroc_contrastive": 0.5068972888687692,
+   "auroc_vgr_cosine": 0.7311356739265296
+  }
+ },
+ "2031": {
+  "hashtag": {
+   "share": 0.4,
+   "auroc_contrastive": 0.847130006874235,
+   "auroc_vgr_cosine": 0.6814955233640159
+  },
+  "shuffle": {
+   "share": 0.4,
+   "auroc_contrastive": 0.910507100581795,
+   "auroc_vgr_cosine": 0.8609057223815033
+  },
+  "gaussian": {
+   "share": 0.4,
+   "auroc_contrastive": 0.458270459232433,
+   "auroc_vgr_cosine": 0.7181249266468823
+  }
+ },
+ "2032": {
+  "hashtag": {
+   "share": 0.4,
+   "auroc_contrastive": 0.8688970206059387,
+   "auroc_vgr_cosine": 0.7365554214241403
+  },
+  "shuffle": {
+   "share": 0.4,
+   "auroc_contrastive": 0.8993720973123418,
+   "auroc_vgr_cosine": 0.8476770115520681
+  },
+  "gaussian": {
+   "share": 0.4,
+   "auroc_contrastive": 0.5129583521955636,
+   "auroc_vgr_cosine": 0.7014297570544741
+  }
+ },
+ "2033": {
+  "hashtag": {
+   "share": 0.4,
+   "auroc_contrastive": 0.8732290461579733,
+   "auroc_vgr_cosine": 0.7153165501399996
+  },
+  "shuffle": {
+   "share": 0.4,
+   "auroc_contrastive": 0.915782237647335,
+   "auroc_vgr_cosine": 0.8763979008433512
+  },
+  "gaussian": {
+   "share": 0.4,
+   "auroc_contrastive": 0.5378355381184716,
+   "auroc_vgr_cosine": 0.7342290796908271
+  }
+ },
+ "2034": {
+  "hashtag": {
+   "share": 0.4,
+   "auroc_contrastive": 0.8783595727914424,
+   "auroc_vgr_cosine": 0.7294422648089466
+  },
+  "shuffle": {
+   "share": 0.4,
+   "auroc_contrastive": 0.9045110071592642,
+   "auroc_vgr_cosine": 0.8430054658551716
+  },
+  "gaussian": {
+   "share": 0.4,
+   "auroc_contrastive": 0.5211131230823399,
+   "auroc_vgr_cosine": 0.6847691682175612
+  }
+ },
+ "2035": {
+  "hashtag": {
+   "share": 0.4,
+   "auroc_contrastive": 0.8795981925791795,
+   "auroc_vgr_cosine": 0.7374629042804688
+  },
+  "shuffle": {
+   "share": 0.4,
+   "auroc_contrastive": 0.9070511208356388,
+   "auroc_vgr_cosine": 0.8293051992689838
+  },
+  "gaussian": {
+   "share": 0.4,
+   "auroc_contrastive": 0.5084104588971045,
+   "auroc_vgr_cosine": 0.7310748956289925
+  }
+ },
+ "2036": {
+  "hashtag": {
+   "share": 0.4,
+   "auroc_contrastive": 0.8705610884764348,
+   "auroc_vgr_cosine": 0.6809810036383146
+  },
+  "shuffle": {
+   "share": 0.4,
+   "auroc_contrastive": 0.9038068172291803,
+   "auroc_vgr_cosine": 0.8284040038227454
+  },
+  "gaussian": {
+   "share": 0.4,
+   "auroc_contrastive": 0.5089386013446674,
+   "auroc_vgr_cosine": 0.7091968043190315
+  }
+ },
+ "2037": {
+  "hashtag": {
+   "share": 0.4,
+   "auroc_contrastive": 0.8695110909913988,
+   "auroc_vgr_cosine": 0.7234367402712808
+  },
+  "shuffle": {
+   "share": 0.4,
+   "auroc_contrastive": 0.9082520161628356,
+   "auroc_vgr_cosine": 0.8272387371527253
+  },
+  "gaussian": {
+   "share": 0.4,
+   "auroc_contrastive": 0.5198158208004292,
+   "auroc_vgr_cosine": 0.7437607933873213
+  }
+ },
+ "2038": {
+  "hashtag": {
+   "share": 0.4,
+   "auroc_contrastive": 0.866373673356471,
+   "auroc_vgr_cosine": 0.7192126485924585
+  },
+  "shuffle": {
+   "share": 0.4,
+   "auroc_contrastive": 0.9031047231024596,
+   "auroc_vgr_cosine": 0.8610880572741143
+  },
+  "gaussian": {
+   "share": 0.4,
+   "auroc_contrastive": 0.4787443622889526,
+   "auroc_vgr_cosine": 0.6687771406535553
+  }
+ },
+ "2039": {
+  "hashtag": {
+   "share": 0.4,
+   "auroc_contrastive": 0.857043156782858,
+   "auroc_vgr_cosine": 0.7437440269604144
+  },
+  "shuffle": {
+   "share": 0.4,
+   "auroc_contrastive": 0.9205166574451319,
+   "auroc_vgr_cosine": 0.83977164126553
+  },
+  "gaussian": {
+   "share": 0.4,
+   "auroc_contrastive": 0.5020014922119947,
+   "auroc_vgr_cosine": 0.7413212782723874
+  }
+ }
+}

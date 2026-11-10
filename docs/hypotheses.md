@@ -22,6 +22,8 @@ Four research questions, each with one main hypothesis, its prediction and what 
 
 **Confirmation on unused seeds** (`rq3_confirmation_run.py`): all six frozen predictions hold on seeds 2040 to 2044: noise loss 0.0099 (5/5), VGR above noisy (5/5), M3 above noisy (5/5), M3 at least M1 (4/5, mean +0.0025), VGR above shuffled (5/5), AUROC 0.9991 (5/5). This replicates the transductive results; it does not test the inductive setting.
 
+**Follow-up: a contrastive detector** (`rq3_contrastive_detector.py`, `rq3_contrastive_noise_types.py`; the hypothesis and its predictions were committed before the runs). Prediction: the detection failure belongs to the two detectors, not to the features, so a small two-tower network trained with InfoNCE on warm items only (clean text, no knowledge of the noise) finds the corrupted items better and raises M3's inductive gain above +0.0004; *supported* only if the mean AUROC is at least 0.72 and the mean M3 gain at least +0.0015 over fifteen seeds. *Partly supported.* The AUROC is 0.868 (range 0.845 to 0.887; VGR's cosine 0.721, ridge 0.565), but the M3 gain is +0.0014 (9 of 15 seeds positive, bootstrap interval over seeds -0.0001 to +0.0028), below the threshold and half of the oracle's +0.0029; random scores lose (-0.0015), and the clean Recall@20 falls by 0.0045. The detector reads image-text agreement and not the look of the hashtags: AUROC 0.910 for shuffled text (natural text of another item) and 0.508 for Gaussian noise on the embedding (VGR's cosine 0.847 and 0.717). I expected an AUROC of 0.60 to 0.70, so the prediction against the hypothesis was wrong on detection and right on the gain.
+
 ## RQ4. Why does the gate trust text? (exploratory; no main claim rests on it)
 
 **Hypothesis 4.** The gate's preference for text on cold items comes from the training interactions, not from the item's content. *Supported on a noise-augmented model, through routes other than those first guessed* (two to three seeds):
@@ -48,7 +50,3 @@ For the same flagged cold items the text is dropped and the item is ranked by it
 ## Reproduction check
 
 Epoch rule, candidate set or seed variation explains the Rec@10 gap to the paper: *not supported.* Mean Rec@10 0.0486, 0 of 15 seeds reach the published 0.0512; the gap is systematic and unexplained (`repro_epoch_rule_tables.py`, `repro_rec10_candidates.py`).
-
-## RQ3 follow-up: a contrastive detector for the inductive setting (H43, written 2026-11-10 before any run)
-
-**Hypothesis 43.** In the warm-only models, the detection failure (AUROC 0.72 for VGR's cosine, 0.565 for the ridge detector) is a weakness of those two detectors, not of the features. A small two-tower network trained with an InfoNCE loss on warm items only, on clean text and without knowledge of the noise, scores image-text agreement better; with its score driving the M3 blend, the repair gain rises above the +0.0004 of VGR's cosine. *Supported* only if on fifteen seeds (2025 to 2039) the mean AUROC on the cold items is at least 0.72 and the mean M3 gain at least +0.0015. Controls: VGR's cosine, the ridge score, a random score, the true mask (oracle, +0.0029). Parameters (the blend weight, the quantile and the steepness) are chosen on noisy validation data, the network's early stopping on held-out warm items; the test set is not used. Predictions are in `docs/hypotheses_log.md`.
