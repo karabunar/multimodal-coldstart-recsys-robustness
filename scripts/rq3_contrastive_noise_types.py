@@ -1,4 +1,4 @@
-"""Control for H43 (added after the results): does the contrastive detector read image-text agreement or the look of hashtag text?
+"""Control for Hypothesis 5 (added after the results): does the contrastive detector read image-text agreement or the look of hashtag text?
 
 Same detectors as rq3_contrastive_detector.py (same seeds). AUROC on the cold items for each noise type at rate 0.4:
 shuffle puts another item's clean text in place (the text stays natural, only the match is wrong), gaussian adds noise, hashtag appends hashtags.
