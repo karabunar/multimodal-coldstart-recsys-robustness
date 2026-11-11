@@ -1,6 +1,6 @@
 """Hypothesis 5: a contrastive image-text detector for the warm-only models (docs/hypotheses.md).
 
-Usage: PYTHONPATH=src python scripts/rq3_contrastive_detector.py 2025 2026 ...   (writes results/rq3_contrastive_detector.json and .md)
+Usage: PYTHONPATH=src python scripts/rq5_contrastive_detector.py 2025 2026 ...   (writes results/rq5_contrastive_detector.json and .md)
 Models: results/rq3_warm_only/checkpoints. Detector: two MLP towers trained with InfoNCE on warm items only (clean text).
 Repair: M3, the blend toward the text of the ten image-nearest warm items, with the weight from the detector's score.
 Controls: VGR's cosine, a random score, the true mask. Parameters are chosen on noisy validation data, never on the test set.
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     res = {}
     for s in seeds:
         res[s] = run(s)
-        json.dump(res, open('results/rq3_contrastive_detector.json', 'w'), indent=1)
+        json.dump(res, open('results/rq5_contrastive_detector.json', 'w'), indent=1)
         print(s, {k: round(v, 4) for k, v in res[s].items() if k in ('auroc_contrastive', 'auroc_vgr_cosine')}, flush=True)
     n = len(res); m = lambda f: np.mean([res[s][f] for s in res])
     lines = ['| quantity | mean |', '|---|---|']
@@ -68,5 +68,5 @@ if __name__ == '__main__':
         lines.append(f'| {f} gain over noisy (seeds positive) | {np.mean(gains):+.4f} ({sum(g > 0 for g in gains)}/{n}) |')
     better = sum(res[s]['m3_contrastive'] > res[s]['m3_random'] for s in res)
     lines.append(f'| contrastive above random (seeds) | {better}/{n} |')
-    open('results/rq3_contrastive_detector.md', 'w').write('\n'.join(lines) + '\n')
+    open('results/rq5_contrastive_detector.md', 'w').write('\n'.join(lines) + '\n')
     print('\n'.join(lines))
