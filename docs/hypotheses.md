@@ -41,6 +41,17 @@ The stress test so far mixes each corrupted item's text with prototypes drawn fr
 
 What would make me doubt the earlier result: b failing says the cosine finds prototypes drawn from warm items but not real clickbait; d failing says the repair does not transfer to realistic corruption. A replacement weight of 1.0 is run as an exploratory sensitivity check only.
 
+## Real item text check (follow-up to RQ1 and RQ2, written 2026-11-11 before any run)
+
+Until now the corruption was made on embeddings. Here the corruption is made on the text of real products and the corrupted text is embedded again with the encoder identified for the distributed features (`roberta-large-nli-stsb-mean-tokens`, mean pooling, raw scale). The items are the cold items with a 2023 catalogue entry (the set S). Two corruptions of the title: *wrap*, a clickbait string from `data_maps/clickbait_strings.txt` put in front of the title, and *mismatch*, the title of another item of S. Every item of S is first embedded from its clean title alone, so that all items of S come from the same pipeline; 80% of S, chosen by the usual test and validation seeds, then get a corrupted title. Reference for the loss is the model on the title-only embeddings, not the original features. Clean-trained checkpoints of seeds 2025 to 2039, no training; parameters chosen on the validation mask, as in the main grid.
+
+Predictions, written before the runs:
+(a) Both corruptions lower Recall@20 against the title-only reference in 15 of 15 seeds; the loss from mismatch is larger than from wrap, since wrap keeps the title.
+(b) VGR's cosine finds mismatched items with an AUROC of at least 0.85 and wrapped items with a lower AUROC, between 0.60 and 0.85.
+(c) M3 beats the unrepaired model in at least 12 of 15 seeds for both corruptions, and beats the random-neighbour and permuted controls in at least 12 of 15 for mismatch.
+(d) Using the title alone costs clean accuracy: the title-only reference is at least 0.0010 below the 0.0770 of the original features (the original text holds more than the title).
+Doubt: if the cost in (d) is larger than the loss from the corruptions, this design cannot separate the two and the result is reported as uninformative.
+
 ## Image-only baseline (added after the other results)
 
 For the same flagged cold items the text is dropped and the item is ranked by its image embedding alone (`scripts/run_image_only.sh`, `scripts/rq2_image_only_table.py`, `results/rq2_image_only.md`). It recovers 79% of the loss against 85% for M3 and 64% for M1; M3 is above it by +0.0005 Recall@20 (11 of 15 seeds) and below it on NDCG@20. On clean input the same rule costs 0.0028 Recall@20, while M3 raises it. The repairs' advantage is therefore mainly kept clean accuracy.
