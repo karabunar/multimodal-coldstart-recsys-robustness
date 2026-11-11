@@ -164,3 +164,6 @@ Cost: the five checkpoint runs of seeds 2030 to 2034 took 10.6 hours, the four h
 
 ## Not done
 - Other noise-augmentation designs (rate, prototype scheme, noise on the image side) and other noise types in training.
+
+## Real item text check
+Needs the 2023 Amazon Baby Products catalogue (`meta_Baby_Products.jsonl`, not included, licence of its owners) and `transformers` (not in `requirements.txt`). `PYTHONPATH=src python scripts/build_real_text_variants.py processed_data_baby/cold data_maps/baby_item_asin.txt <meta_Baby_Products.jsonl> data_maps/clickbait_strings.txt data_maps/real_text_variants.npz` embeds the clean, wrapped and mismatched titles of the 698 cold items that have a catalogue entry (the npz holds embeddings only and is not committed). `PYTHONPATH=src python scripts/rq2_real_item_text.py $(seq 2025 2039)` evaluates the clean-trained checkpoints (no training) and writes `results/rq2_real_item_text.{json,md}`.
