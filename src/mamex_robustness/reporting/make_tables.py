@@ -22,7 +22,9 @@ def _load_all(results_dir):
     runs = []
     for path in sorted(glob.glob(os.path.join(results_dir, '*.json'))):
         with open(path) as f:
-            runs.append(json.load(f))
+            run = json.load(f)
+        if isinstance(run, dict) and 'args' in run:  # analysis outputs in results/ are not training runs
+            runs.append(run)
     return runs
 
 

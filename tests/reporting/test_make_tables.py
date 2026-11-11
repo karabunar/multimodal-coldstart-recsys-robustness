@@ -353,3 +353,11 @@ def test_grid_report_gives_the_share_of_the_matched_gain_kept(with_grid, tmp_pat
 def test_grid_is_none_without_runs(tmp_path):
     from mamex_robustness.reporting.make_tables import build_repair_grid
     assert build_repair_grid(str(tmp_path)) is None
+
+
+def test_analysis_result_files_without_run_arguments_are_ignored(full):
+    """results/ also holds analysis outputs (per-seed dicts, lists) that are not training runs; they must not break the tables."""
+    (full / 'analysis_by_seed.json').write_text(json.dumps({'2025': {'recall': 0.07}, '2026': {'recall': 0.08}}))
+    (full / 'analysis_list.json').write_text(json.dumps([1, 2, 3]))
+    t = build_tables(full)['accuracy']
+    assert row(t, 'Clean baseline')['n'] == 3

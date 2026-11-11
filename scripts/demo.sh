@@ -9,8 +9,12 @@ OUT=${OUT:-demo_out}
 DATA_PATH=${DATA_PATH:-processed_data_baby/cold}
 
 echo "== STEP 1: rebuild results/tables.md and results/repro_epoch_rule.md from the saved result files"
-$PY -m mamex_robustness.reporting.make_tables > /dev/null && $PY scripts/repro_epoch_rule_tables.py > /dev/null && git --no-pager diff --stat -- results/tables.md results/repro_epoch_rule.md | tail -1 || true
-echo "   (no diff above means the saved tables are reproduced exactly)"
+if $PY -m mamex_robustness.reporting.make_tables > /dev/null && $PY scripts/repro_epoch_rule_tables.py > /dev/null; then
+  git --no-pager diff --stat -- results/tables.md results/repro_epoch_rule.md | tail -1
+  echo "   (no diff above means the saved tables are reproduced exactly)"
+else
+  echo "   STEP 1 FAILED: the tables could not be rebuilt (see the error above)"
+fi
 
 echo "== STEP 2: unit tests (tiny synthetic data)"
 $PY -m pytest -q 2>&1 | tail -1 || true
