@@ -93,6 +93,7 @@ What was found (details and per-hypothesis outcomes: `docs/hypotheses.md`, table
 | Neighbour-text repair (M1, M3) over fifteen seeds | `scripts/rq2_repair_seeds.py`, `scripts/rq2_repair_decomposition.py` | `results/rq2_repair_fifteen_seeds.md`, `results/rq2_repair_decomposition.md` |
 | Image-only baseline | `scripts/run_image_only.sh`, `scripts/rq2_image_only_table.py` | `results/rq2_image_only.md` |
 | Corrupted real product titles, embedded again | `scripts/build_real_text_variants.py`, `scripts/rq2_real_item_text.py` (need the 2023 catalogue file, not included) | `results/rq2_real_item_text.md` |
+| Why M3 trails M1 on real titles | `scripts/rq2_real_item_text_decomposition.py` | `results/rq2_real_item_text_decomposition.md` |
 | Real clickbait strings | `scripts/run_real_clickbait.sh`, `scripts/rq2_real_clickbait_table.py` | `results/rq2_real_clickbait.md` |
 | Second dataset (Sports) | `scripts/run_second_dataset.sh`, `scripts/rq2_second_dataset_table.py` | `results/rq2_second_dataset_sports.md` |
 | Confirmation on five unused seeds | `scripts/rq3_confirmation_run.py` | `results/rq3_confirmation.md` |
