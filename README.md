@@ -58,6 +58,8 @@ Not included in the repository. Download `processed_data_baby.zip` from the Goog
 
 SHA-256 checksums of the six files, the feature-provenance notes and the licence status are in `docs/reproducibility.md`. Amazon review data is distributed under its own research terms; check the original dataset page before redistributing. No data is committed here.
 
+**Extra files for the real-text checks, not included.** Two checks need Amazon files that are not ours and are not committed: the 2014 Baby 5-core review file (`Baby_5.json`, for `scripts/align_items_to_asin.py`, whose output `data_maps/baby_item_asin.txt` is already in the repository) and the 2023 Amazon Baby Products catalogue (`meta_Baby_Products.jsonl`, 691 MB, for `scripts/rq2_real_text_source.py` and the real item text check, `scripts/build_real_text_variants.py` and `scripts/rq2_real_item_text.py`). Download them from their owners and check their terms. Everything else, including the saved results of these checks (`results/rq2_real_text.md`, `results/rq2_real_item_text.md`), needs neither file. Titles are not stored here; the embeddings built from them (`data_maps/real_text_variants.npz`) are not committed either.
+
 ## Results
 Test split, cold items only, hashtag noise on 40% of the cold items, mean Recall@20 over fifteen seeds (2025 to 2039, pinned PyTorch 2.9.1). The gains are over the unrepaired noisy model.
 
