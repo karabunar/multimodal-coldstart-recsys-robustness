@@ -1,6 +1,6 @@
 # Literature search and comparison
 
-Compiled on 2026-10-16 from web search results and fetched paper pages (see `docs/ai_use.md`). Rows based on an abstract only say so.
+Compiled on 2026-10-16 from web search results and fetched paper pages (AI use is disclosed in the report, section "Use of AI Tools", and in the separate AI usage statement). Rows based on an abstract only say so.
 
 Labels used throughout: **[Authors]** = a claim or number the cited paper reports; **[Interpretation]** = an inference drawn here, not stated in the paper; **[Measured]** = a result from this project's own runs (none appear here yet).
 
