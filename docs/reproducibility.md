@@ -156,7 +156,7 @@ seeds 2030 to 2034 are retrained with checkpoints (`--save_final 1 --results_dir
 
 `python -I scripts/rq4_gate_perp.py` (CPU, reads the augmented checkpoints) writes `results/rq4_gate_perp.md`; `PY=<python 2.9.1 env> ./scripts/run_augmentation_designs.sh` trains nine augmented models (designs A shuffle, B fixed prototypes, C image-side noise; seeds 2025 to 2027; about 2.5 hours with nine jobs at once), runs the gate cause analysis on each checkpoint and writes `results/rq4_augmentation_designs.md`. `STAGE=after` skips the training.
 
-Real text (CPU, minutes): `python -I scripts/align_items_to_asin.py processed_data_baby/cold <Baby_5.json> data_maps/baby_item_asin.txt` (needs the 2014 Amazon Baby 5-core review file; the output is already in `data_maps/`), then `python -I scripts/rq2_real_text_source.py processed_data_baby/cold data_maps/baby_item_asin.txt <meta_Baby_Products.jsonl> <Baby_5.json> results/rq2_real_text`. The input files are read as data. The item browser's `items.json` is built with `space/build_items.py` from the same map.
+Real text (CPU, minutes): `python -I scripts/align_items_to_asin.py processed_data_baby/cold <Baby_5.json> data_maps/baby_item_asin.txt` (needs the 2014 Amazon Baby 5-core review file; the output is already in `data_maps/`), then `python -I scripts/rq2_real_text_source.py processed_data_baby/cold data_maps/baby_item_asin.txt <meta_Baby_Products.jsonl> <Baby_5.json> results/rq2_real_text`. The input files are read as data.
 
 Item ids can be mapped to ASINs for the Baby items through the `5-core/item_list.txt` of the LATTICE Baby files (7,050 items); the 2023 Amazon catalogue (`meta_Baby_Products.jsonl`, not included) gives titles for 3,443 of the 7,050 items.
 
