@@ -79,7 +79,7 @@ What was found (details and per-hypothesis outcomes: `docs/hypotheses.md`, table
 - Confirmation: five unused seeds (2040 to 2044), with six predictions fixed beforehand (`results/rq3_confirmation.md`), all hold: M3 0.0762 against noisy 0.0671 and clean 0.0770.
 - An image-only baseline (drop the text of the same flagged items) recovers 79% of the loss against 85% for M3 and 64% for M1; M3 is above it by +0.0005 and keeps clean accuracy (0.0786 against 0.0742 for image-only), `results/rq2_image_only.md`.
 - Real clickbait strings embedded with the identified text encoder (15 seeds, `results/rq2_real_clickbait.md`) give the same picture: loss 14.9%, M3 gain +0.0102, AUROC of the cosine 0.999.
-- The distributed features are LATTICE's, and the noise is simulated on embeddings, not on real item text.
+- The distributed features are LATTICE's, and the noise is simulated on embeddings. One check corrupts the text of 698 real product titles and embeds it again (`results/rq2_real_item_text.md`): the repairs hold, but the image-only baseline and the blind blend gain more than M3 there.
 
 ## Where each claim is checked
 | Claim in the report | Script | Result file |
@@ -90,6 +90,7 @@ What was found (details and per-hypothesis outcomes: `docs/hypotheses.md`, table
 | VGR gain, bootstrap and controls | `scripts/rq2_vgr_bootstrap.py`, `scripts/rq2_vgr_control_scope.py`, `scripts/rq2_gamma_rule.py` | `results/rq2_vgr_bootstrap.md`, `results/rq2_vgr_control_scope.md`, `results/rq2_gamma_rule.md` |
 | Neighbour-text repair (M1, M3) over fifteen seeds | `scripts/rq2_repair_seeds.py`, `scripts/rq2_repair_decomposition.py` | `results/rq2_repair_fifteen_seeds.md`, `results/rq2_repair_decomposition.md` |
 | Image-only baseline | `scripts/run_image_only.sh`, `scripts/rq2_image_only_table.py` | `results/rq2_image_only.md` |
+| Corrupted real product titles, embedded again | `scripts/build_real_text_variants.py`, `scripts/rq2_real_item_text.py` (need the 2023 catalogue file, not included) | `results/rq2_real_item_text.md` |
 | Real clickbait strings | `scripts/run_real_clickbait.sh`, `scripts/rq2_real_clickbait_table.py` | `results/rq2_real_clickbait.md` |
 | Second dataset (Sports) | `scripts/run_second_dataset.sh`, `scripts/rq2_second_dataset_table.py` | `results/rq2_second_dataset_sports.md` |
 | Confirmation on five unused seeds | `scripts/rq3_confirmation_run.py` | `results/rq3_confirmation.md` |
