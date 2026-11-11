@@ -1,6 +1,6 @@
 # Reused-component inventory
 
-What this repository takes from other work, what it changes, and what is new. The upstream reference is the MAMEX repository (`L2R-UET/MAMEX`, commit `88a932e`, 2026-09-12; remote `upstream`). Every statement below was produced by comparing that commit with the current tree (`git diff -M 88a932e HEAD`), not from memory. Who wrote which part (author or AI assistant) is recorded in `docs/ai_use.md`, not here.
+What this repository takes from other work, what it changes, and what is new. The upstream reference is the MAMEX repository (`L2R-UET/MAMEX`, commit `88a932e`, 2026-09-12; remote `upstream`). Every statement below was produced by comparing that commit with the current tree (`git diff -M 88a932e HEAD`), not from memory. Who wrote which part (author or AI assistant) is disclosed in the report, section "Use of AI Tools", and in the separate AI usage statement, not here.
 
 ## 1. Reused from the upstream MAMEX code
 
