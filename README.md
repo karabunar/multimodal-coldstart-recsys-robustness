@@ -2,6 +2,13 @@
 
 Reproduction of MAMEX (Multi-modal Adaptive Mixture of Experts for Cold-start Recommendation, CIKM 2025) on Amazon Baby, a stress test with corrupted text on cold items, and a proposed fix, Visual Grounding Regularization (VGR).
 
+## In short
+- **Reproduction:** the released MAMEX code gives Recall@20 0.0776 against 0.0771 published (Recall@10 stays 0.0025 short, cause not identified).
+- **Main finding:** corrupting 40% of the cold items' text lowers Recall@20 by about 14% and the gate does not react. A training-free repair that blends in the text of the visually nearest warm items (M3) recovers about 85% of the loss, over fifteen seeds and against random-neighbour and permuted controls.
+- **Negative findings:** VGR, the proposed gate fix, recovers 27 to 38% and two thirds of that is reached by controls that ignore the image. The repair works only when the cold items' features were in the alignment loss during training; in the inductive setting it fails or reaches a fraction of the gain.
+
+Where each claim is checked: the table below the Results section.
+
 ## Source paper and code
 This project studies and extends the following work. It is not the authors' repository.
 
@@ -9,7 +16,7 @@ This project studies and extends the following work. It is not the authors' repo
 - **Authors' code:** <https://github.com/L2R-UET/MAMEX>, commit `88a932eca821a5657b2b7fc0b6445e4685f4dfab`. This repository restructures that code into a package; model, losses and training loop are unchanged except for two switches that default to off (`docs/reused_components.md`). The upstream repository states no licence, so its code is used here for study and reproduction only, with attribution.
 - The paper's published scores (Baby: Rec@10 0.0512, Rec@20 0.0771, NDCG@10 0.0292, NDCG@20 0.0363) are kept apart from the scores measured here throughout the report.
 
-The upstream README is kept in `docs/upstream_README.md`. The full write-up is the submitted report (PDF, IEEE conference format).
+The upstream README is kept in `docs/upstream_README.md`. The upstream README shows an MIT licence badge, but the authors' repository publishes no licence file; the code is reused here with attribution only (`docs/reused_components.md`). The full write-up is the submitted report (PDF, IEEE conference format).
 
 ## Research question
 Does MAMEX's adaptive gate keep trusting a text embedding that has been corrupted, and does a parameter-free image-text agreement signal (VGR) reduce the damage without hurting clean accuracy? Research questions and outcomes: `docs/hypotheses.md`.
@@ -73,6 +80,22 @@ What was found (details and per-hypothesis outcomes: `docs/hypotheses.md`, table
 - An image-only baseline (drop the text of the same flagged items) recovers 79% of the loss against 85% for M3 and 64% for M1; M3 is above it by +0.0005 and keeps clean accuracy (0.0786 against 0.0742 for image-only), `results/rq2_image_only.md`.
 - Real clickbait strings embedded with the identified text encoder (15 seeds, `results/rq2_real_clickbait.md`) give the same picture: loss 14.9%, M3 gain +0.0102, AUROC of the cosine 0.999.
 - The distributed features are LATTICE's, and the noise is simulated on embeddings, not on real item text.
+
+## Where each claim is checked
+| Claim in the report | Script | Result file |
+|---|---|---|
+| Main tables: clean, noisy, VGR, controls (Baby) | `scripts/run_experiments.sh`, `python -m mamex_robustness.reporting.make_tables` | `results/tables.md` |
+| Reproduction vs published scores, Rec@10 gap | `scripts/repro_rec10_candidates.py`, `scripts/repro_epoch_rule_tables.py` | `results/repro_rec10_candidates.md`, `results/repro_epoch_rule.md` |
+| The gate is nearly constant | `scripts/rq1_gate_spread.py` | `results/rq1_gate_spread.md` |
+| VGR gain, bootstrap and controls | `scripts/rq2_vgr_bootstrap.py`, `scripts/rq2_vgr_control_scope.py`, `scripts/rq2_gamma_rule.py` | `results/rq2_vgr_bootstrap.md`, `results/rq2_vgr_control_scope.md`, `results/rq2_gamma_rule.md` |
+| Neighbour-text repair (M1, M3) over fifteen seeds | `scripts/rq2_repair_seeds.py`, `scripts/rq2_repair_decomposition.py` | `results/rq2_repair_fifteen_seeds.md`, `results/rq2_repair_decomposition.md` |
+| Image-only baseline | `scripts/run_image_only.sh`, `scripts/rq2_image_only_table.py` | `results/rq2_image_only.md` |
+| Real clickbait strings | `scripts/run_real_clickbait.sh`, `scripts/rq2_real_clickbait_table.py` | `results/rq2_real_clickbait.md` |
+| Second dataset (Sports) | `scripts/run_second_dataset.sh`, `scripts/rq2_second_dataset_table.py` | `results/rq2_second_dataset_sports.md` |
+| Confirmation on five unused seeds | `scripts/rq3_confirmation_run.py` | `results/rq3_confirmation.md` |
+| Inductive setting, ridge detector and muting | `scripts/rq3_inductive_remedies.py` | `results/rq3_inductive_remedies.md` |
+| Contrastive detector (Hypothesis 5) | `scripts/rq5_contrastive_detector.py`, `scripts/rq5_contrastive_noise_types.py` | `results/rq5_contrastive_detector.md`, `results/rq5_contrastive_noise_types.md` |
+| Why the gate trusts text (exploratory) | `scripts/rq4_*.py` | `results/rq4_*.md` |
 
 ## Tests
 `python -m pytest -q` runs the unit and end-to-end tests in a few seconds on CPU, with a tiny synthetic dataset (no real data needed). They cover the noise simulator, VGR gating and controls, evaluation and reporting, the CLI, the upstream behaviour before the restructure, and the training-noise ablation. The tests check the code, not the scientific results.
