@@ -1,8 +1,8 @@
 """Control for Hypothesis 5 (added after the results): does the contrastive detector read image-text agreement or the look of hashtag text?
 
-Same detectors as rq3_contrastive_detector.py (same seeds). AUROC on the cold items for each noise type at rate 0.4:
+Same detectors as rq5_contrastive_detector.py (same seeds). AUROC on the cold items for each noise type at rate 0.4:
 shuffle puts another item's clean text in place (the text stays natural, only the match is wrong), gaussian adds noise, hashtag appends hashtags.
-Usage: PYTHONPATH=src python scripts/rq3_contrastive_noise_types.py 2025 ...   (writes results/rq3_contrastive_noise_types.json and .md)
+Usage: PYTHONPATH=src python scripts/rq5_contrastive_noise_types.py 2025 ...   (writes results/rq5_contrastive_noise_types.json and .md)
 """
 import json
 import sys
@@ -35,11 +35,11 @@ if __name__ == '__main__':
     res = {}
     for s in map(int, sys.argv[1:]):
         res[s] = run(s)
-        json.dump(res, open('results/rq3_contrastive_noise_types.json', 'w'), indent=1)
+        json.dump(res, open('results/rq5_contrastive_noise_types.json', 'w'), indent=1)
         print(s, {t: round(res[s][t]['auroc_contrastive'], 3) for t in TYPES}, flush=True)
     lines = ['| noise type (rate 0.4) | share corrupted | AUROC contrastive | AUROC VGR cosine |', '|---|---|---|---|']
     for t in TYPES:
         m = lambda k: np.mean([res[s][t][k] for s in res])
         lines.append(f"| {t} | {m('share'):.2f} | {m('auroc_contrastive'):.3f} | {m('auroc_vgr_cosine'):.3f} |")
-    open('results/rq3_contrastive_noise_types.md', 'w').write('\n'.join(lines) + '\n')
+    open('results/rq5_contrastive_noise_types.md', 'w').write('\n'.join(lines) + '\n')
     print('\n'.join(lines))

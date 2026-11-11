@@ -27,7 +27,7 @@ Does MAMEX's adaptive gate keep trusting a text embedding that has been corrupte
 src/mamex_robustness/   code: cli.py (training and evaluation), repair_cli.py, gate_cause_cli.py;
                         data/ (loader, noise), domain/ (gating, noise, repair), models/ (MAMEX), application/ (session, evaluation, diagnostics), reporting/
 tests/                  unit and end-to-end tests on a synthetic dataset (no data needed)
-scripts/                run_*.sh (experiment drivers), repro_*, rq1_* to rq4_* (analysis scripts grouped by research question, each writes results/<same name>.md), build_cold_dataset.py, demo.sh
+scripts/                run_*.sh (experiment drivers), repro_*, rq1_* to rq5_* (analysis scripts grouped by research question, each writes results/<same name>.md), build_cold_dataset.py, demo.sh
 results/                result JSONs and tables; top level = main runs and hNN.md/json; subfolders: ckpt291 and ckpt_aug (clean and augmented checkpoints, *.pt ignored),
                         repair, diagnostics, gate_cause, sports, curves291; rq3_* and rq4_* folders hold the runs of those analyses
 docs/                   hypotheses.md, reproducibility.md, literature.md, references.bib,
