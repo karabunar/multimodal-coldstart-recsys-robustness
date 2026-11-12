@@ -6,12 +6,12 @@ What this repository takes from other work, what it changes, and what is new. Th
 
 | Upstream file | Now at | Change | What it holds |
 |---|---|---|---|
-| `criterion.py` | `src/mamex_robustness/models/criterion.py` | none (byte-identical) | BPR, MSE and related loss functions |
+| `criterion.py` | `src/mamex_robustness/models/criterion.py` | unused code removed (`l2_regularization`, `CCA_SSG`, `Noise_path_length_radio`, `uniformity`); the remaining losses are unchanged | BPR, MSE and related loss functions |
 | `evaluation.py` | `src/mamex_robustness/application/evaluation.py` | one comment translated | Faiss top-K search (`IndexFlatIP`, exact) and Recall, HR and NDCG |
 | `model.py` | `src/mamex_robustness/models/mamex.py` | comments translated; added `set_eval_text`, an optional VGR step after the gate, and storing the gate weights and cosine; training forward pass unchanged when VGR is off and no evaluation text is set | MoE experts, two-way gate, fusion and balance losses |
 | `session.py` | `src/mamex_robustness/application/session.py` | split into a package; the training loop (`train_epoch`, early stopping, best-epoch choice on validation NDCG@10) is kept; added corrupted-text evaluation, noise-augmented training, probes, `save_best` | training and evaluation loop |
-| `loader.py` | `src/mamex_robustness/data/loader.py` | comments translated; added `noisy_text_feat` and `train_noisy_text_feat` | data loading, splits, negative sampling |
-| `tool.py` | `src/mamex_robustness/tool.py` | comments translated; added `apply_mode_defaults` | logging and small helpers |
+| `loader.py` | `src/mamex_robustness/data/loader.py` | comments translated; added `noisy_text_feat` and `train_noisy_text_feat`; unused sampling code removed (`neg_sample`, `neg_uniform_sample`, `Uniform_PairSample`; training uses `PairSample`) | data loading, splits, negative sampling |
+| `tool.py` | `src/mamex_robustness/tool.py` | comments translated; added `apply_mode_defaults`; unused helpers removed (`get_logger`, `AverageMeter`, `set_seed`, `del_tensor_ele`) | logging and small helpers |
 | `enviroment.py` | `src/mamex_robustness/application/environment.py` | file renamed; the data path is read from `--data_path` instead of being hard-coded | environment and device set-up |
 | `main.py` | `main.py` | replaced by a three-line launcher; the argument parsing and run logic moved to `src/mamex_robustness/cli.py` | entry point |
 | `README.md` | `README.md` | replaced by this project's README | |

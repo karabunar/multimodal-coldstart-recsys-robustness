@@ -1,18 +1,7 @@
 import numpy as np
 import torch
-import math
-import time
 import logging
 import os
-def get_logger(log_name, log_file, level=logging.INFO):
-    formatter = logging.Formatter('%(asctime)s : %(message)s', "%Y-%m-%d %H:%M:%S")
-    fileHandler = logging.FileHandler(log_file, mode='a')
-    fileHandler.setFormatter(formatter)
-    vlog = logging.getLogger(log_name)
-    vlog.setLevel(level)
-    vlog.addHandler(fileHandler)
-    return vlog
-
 class Log(object):
     def __init__(self, log_name, log_file, level=logging.INFO):
         # log file name
@@ -65,42 +54,10 @@ class Log(object):
  
 
 
-class AverageMeter(object):
-    """Computes and stores the average and current value"""
-
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.best_val = 0
-        self.avg = 0
-        self.sum = 0
-        self.count = 0
-
-    def update(self, val, n=1):
-        self.best_val = max(self.best_val, val)
-        self.sum += val * n
-        self.count += n
-        self.avg = self.sum / self.count
-
-
 def cprint(words):
     print(f"\033[0;30;43m{words}\033[0m")
     # print(words)
 
-
-def set_seed(seed):
-    np.random.seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed(seed)
-        torch.cuda.manual_seed_all(seed)
-    torch.manual_seed(seed)
-
-
-def del_tensor_ele(tensor, index):
-    tensor_1 = tensor[0:index]
-    tensor_2 = tensor[index + 1:]
-    return torch.cat((tensor_1, tensor_2), dim=0)
 
 def shuffle(*arrays, **kwargs):
     require_indices = kwargs.get('indices', False)

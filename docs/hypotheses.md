@@ -1,6 +1,6 @@
 # Research questions and hypotheses
 
-Four research questions, each with one main hypothesis, its prediction and what was measured. Supporting analyses are named by the script that runs them (`scripts/<name>.py`, output `results/<name>.md`). Failed predictions are kept.
+Five research questions, each with one main hypothesis, its prediction and what was measured. Supporting analyses are named by the script that runs them (`scripts/<name>.py`, output `results/<name>.md`). Failed predictions are kept.
 
 **Status of the evidence.** The repository has two commits made on the day of publication, so its history cannot show when the hypotheses were written relative to the experiments. The supporting analyses are exploratory. Only the confirmation run (`rq3_confirmation_run.py`) is fully pre-specified: new seeds, frozen rules, six predictions. No correction for multiple comparisons was made.
 
