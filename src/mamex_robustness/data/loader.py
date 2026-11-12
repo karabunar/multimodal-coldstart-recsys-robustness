@@ -1,7 +1,6 @@
 import os
 from collections import defaultdict
 import numpy as np
-import scipy.sparse as sp
 import torch
 from tqdm import tqdm
 
@@ -184,33 +183,6 @@ class Loader4MM(torch.utils.data.Dataset):
             posItems[user].extend(self.train_data[user])
         return posItems
 
-    def neg_sample(self):
-        self.pair_data = []
-        print('generate samples ...')
-        for user_id in tqdm(self.train_data.keys()):
-            positive_list = self.train_data[user_id]  # self.train_dict[user_id]
-            for item_i in positive_list:
-                item_j = np.random.randint(self.m_item)
-                while item_j in positive_list:
-                    item_j = np.random.randint(self.m_item)
-                self.pair_data.append([user_id, item_i, item_j])
-
-    def neg_uniform_sample(self):
-        user_num = len(self.trainUser)
-        users = np.random.randint(0, self.n_user, user_num)
-        self.pair_data = []
-        print('generate uniform samples ...')
-        for user_id in tqdm(users):
-            positive_list = self.train_data[user_id]  # self.train_dict[user_id]
-            if len(positive_list) == 0:
-                continue
-            posindex = np.random.randint(0, len(positive_list))
-            item_i = positive_list[posindex]
-            item_j = np.random.randint(self.m_item)
-            while item_j in positive_list:
-                item_j = np.random.randint(self.m_item)
-            self.pair_data.append([user_id, item_i, item_j])
-
     def __getitem__(self, index):
         user = self.pair_data[index][0]
         pos_item = self.pair_data[index][1]
@@ -219,31 +191,6 @@ class Loader4MM(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.trainItem)
-
-def Uniform_PairSample(dataset):
-    """
-    the original impliment of BPR Sampling in LightGCN
-    :return:
-        np.array
-    """
-    user_num = len(dataset.trainItem)
-    users = np.random.randint(0, dataset.n_user, user_num)
-    allPos = dataset.allPos
-    S = []
-    for i, user in enumerate(users):
-        posForUser = allPos[user]
-        if len(posForUser) == 0:
-            continue
-        posindex = np.random.randint(0, len(posForUser))
-        positem = posForUser[posindex]
-        while True:
-            negitem = np.random.randint(0, dataset.m_item)
-            if negitem in posForUser:
-                continue
-            else:
-                break
-        S.append([user, positem, negitem])
-    return np.array(S)
 
 def PairSample(dataset):
     """
