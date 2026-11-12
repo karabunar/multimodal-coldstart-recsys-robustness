@@ -4,10 +4,12 @@ Reproduction of MAMEX (Multi-modal Adaptive Mixture of Experts for Cold-start Re
 
 ## In short
 - **Reproduction:** the released MAMEX code gives Recall@20 0.0776 against 0.0771 published (Recall@10 stays 0.0025 short, cause not identified).
-- **Main finding:** corrupting 40% of the cold items' text lowers Recall@20 by about 14% and the gate does not react. A training-free repair that blends in the text of the visually nearest warm items (M3) recovers about 85% of the loss, over fifteen seeds and against random-neighbour and permuted controls.
+- **Main finding:** corrupting 40% of the cold items' text lowers Recall@20 by about 14% and the gate does not react. A training-free repair that blends in the text of the visually nearest warm items (Gated Neighbour Blend, GNB) recovers about 85% of the loss, over fifteen seeds and against random-neighbour and permuted controls.
 - **Negative findings:** VGR, the proposed gate fix, recovers 27 to 38% and two thirds of that is reached by controls that ignore the image. The repair works only when the cold items' features were in the alignment loss during training; in the inductive setting it fails or reaches a fraction of the gain.
 
 Where each claim is checked: the table below the Results section.
+
+**Naming.** NB is the Neighbour Blend, which blends the text of the ten visually nearest warm items into every cold item. GNB is the Gated Neighbour Blend, which does this only for items that VGR's cosine flags. The Image-Only Fallback drops the flagged text and ranks by image. I chose these names. They are not methods from the literature. Scripts and result files still use the old names M1, M3 and "image only".
 
 ## Source paper and code
 This project studies and extends the following work. It is not the authors' repository.
@@ -68,8 +70,8 @@ Test split, cold items only, hashtag noise on 40% of the cold items, mean Recall
 | Clean | 0.0770 |
 | Noisy text | 0.0677 |
 | Noisy text + VGR (gain +0.0026) | 0.0703 |
-| Noisy text + M1, blind neighbour-text blend (+0.0059) | 0.0736 |
-| Noisy text + M3, flagged-item neighbour-text blend (+0.0078) | 0.0755 |
+| Noisy text + NB, blind neighbour-text blend (+0.0059) | 0.0736 |
+| Noisy text + GNB, flagged-item neighbour-text blend (+0.0078) | 0.0755 |
 
 The paper's published Baby scores (Rec@20 0.0771, NDCG@20 0.0363) are not mixed with these. Recall@10 stays 0.0025 short of the published 0.0512 in all fifteen seeds; the cause is not identified.
 
@@ -77,11 +79,11 @@ What was found (details and per-hypothesis outcomes: `docs/hypotheses.md`, table
 - Corrupted text lowers Recall@20 by about 14%; the clean-trained gate is nearly constant (text weight 0.55), so it neither adapts nor is misled item by item.
 - VGR, the one proposed fix, recovers 27 to 38% of the loss, but about two thirds of that is also reached by controls that ignore the image (bootstrap interval of the difference to the shuffled control: +0.0012 [0.0007, 0.0018]).
 - A training-free repair that blends in the text of the visually nearest warm items does better and beats random-neighbour and permuted-score controls. On a second dataset (Amazon Sports, built from LATTICE's files) the ranking holds with a smaller effect.
-- The gains depend on the cold items' clean features having been in the alignment loss during training. With the cold items left out (`--warm_only_aux 1`), the AUROC of VGR's cosine falls from 0.999 to 0.72 and M3's gain from +0.0078 to +0.0004; two inductive remedies failed. These are not inductive cold-start results.
-- Confirmation: five unused seeds (2040 to 2044), with six predictions fixed beforehand (`results/rq3_confirmation.md`), all hold: M3 0.0762 against noisy 0.0671 and clean 0.0770.
-- An image-only baseline (drop the text of the same flagged items) recovers 79% of the loss against 85% for M3 and 64% for M1; M3 is above it by +0.0005 and keeps clean accuracy (0.0786 against 0.0742 for image-only), `results/rq2_image_only.md`.
-- Real clickbait strings embedded with the identified text encoder (15 seeds, `results/rq2_real_clickbait.md`) give the same picture: loss 14.9%, M3 gain +0.0102, AUROC of the cosine 0.999.
-- The distributed features are LATTICE's, and the noise is simulated on embeddings. One check corrupts the text of 698 real product titles and embeds it again (`results/rq2_real_item_text.md`): the repairs hold, but the image-only baseline and the blind blend gain more than M3 there.
+- The gains depend on the cold items' clean features having been in the alignment loss during training. With the cold items left out (`--warm_only_aux 1`), the AUROC of VGR's cosine falls from 0.999 to 0.72 and GNB's gain from +0.0078 to +0.0004; two inductive remedies failed. These are not inductive cold-start results.
+- Confirmation: five unused seeds (2040 to 2044), with six predictions fixed beforehand (`results/rq3_confirmation.md`), all hold: GNB 0.0762 against noisy 0.0671 and clean 0.0770.
+- An Image-Only Fallback (drop the text of the same flagged items and rank by image) recovers 79% of the loss against 85% for GNB and 64% for NB; GNB is above it by +0.0005 and keeps clean accuracy (0.0786 against 0.0742 for the fallback), `results/rq2_image_only.md`.
+- Real clickbait strings embedded with the identified text encoder (15 seeds, `results/rq2_real_clickbait.md`) give the same picture: loss 14.9%, GNB gain +0.0102, AUROC of the cosine 0.999.
+- The distributed features are LATTICE's, and the noise is simulated on embeddings. One check corrupts the text of 698 real product titles and embeds it again (`results/rq2_real_item_text.md`): the repairs hold, but the image-only baseline and the blind blend gain more than GNB there.
 
 ## Where each claim is checked
 | Claim in the report | Script | Result file |
@@ -90,10 +92,10 @@ What was found (details and per-hypothesis outcomes: `docs/hypotheses.md`, table
 | Reproduction vs published scores, Rec@10 gap | `scripts/repro_rec10_candidates.py`, `scripts/repro_epoch_rule_tables.py` | `results/repro_rec10_candidates.md`, `results/repro_epoch_rule.md` |
 | The gate is nearly constant | `scripts/rq1_gate_spread.py` | `results/rq1_gate_spread.md` |
 | VGR gain, bootstrap and controls | `scripts/rq2_vgr_bootstrap.py`, `scripts/rq2_vgr_control_scope.py`, `scripts/rq2_gamma_rule.py` | `results/rq2_vgr_bootstrap.md`, `results/rq2_vgr_control_scope.md`, `results/rq2_gamma_rule.md` |
-| Neighbour-text repair (M1, M3) over fifteen seeds | `scripts/rq2_repair_seeds.py`, `scripts/rq2_repair_decomposition.py` | `results/rq2_repair_fifteen_seeds.md`, `results/rq2_repair_decomposition.md` |
-| Image-only baseline | `scripts/run_image_only.sh`, `scripts/rq2_image_only_table.py` | `results/rq2_image_only.md` |
+| Neighbour-text repair (NB, GNB) over fifteen seeds | `scripts/rq2_repair_seeds.py`, `scripts/rq2_repair_decomposition.py` | `results/rq2_repair_fifteen_seeds.md`, `results/rq2_repair_decomposition.md` |
+| Image-Only Fallback | `scripts/run_image_only.sh`, `scripts/rq2_image_only_table.py` | `results/rq2_image_only.md` |
 | Corrupted real product titles, embedded again | `scripts/build_real_text_variants.py`, `scripts/rq2_real_item_text.py` (need the 2023 catalogue file, not included) | `results/rq2_real_item_text.md` |
-| Why M3 trails M1 on real titles | `scripts/rq2_real_item_text_decomposition.py` | `results/rq2_real_item_text_decomposition.md` |
+| Why GNB trails NB on real titles | `scripts/rq2_real_item_text_decomposition.py` | `results/rq2_real_item_text_decomposition.md` |
 | Real clickbait strings | `scripts/run_real_clickbait.sh`, `scripts/rq2_real_clickbait_table.py` | `results/rq2_real_clickbait.md` |
 | Second dataset (Sports) | `scripts/run_second_dataset.sh`, `scripts/rq2_second_dataset_table.py` | `results/rq2_second_dataset_sports.md` |
 | Confirmation on five unused seeds | `scripts/rq3_confirmation_run.py` | `results/rq3_confirmation.md` |
@@ -112,7 +114,7 @@ PY=python DATA_PATH=<folder with the Baby data, see Data> ./scripts/demo.sh
 ```
 1. The tables of `results/` are rebuilt from the saved result files (`results/tables.md`, `results/repro_epoch_rule.md`); `git diff` shows no change when they are reproduced exactly.
 2. The unit tests run on a tiny synthetic dataset.
-3. A clean baseline is trained for 21 epochs with a checkpoint, evaluated under corrupted cold-item text (40% of the cold items), with VGR, and with the training-free text repair (M1, M3), and the Recall@20 of each is printed.
+3. A clean baseline is trained for 21 epochs with a checkpoint, evaluated under corrupted cold-item text (40% of the cold items), with VGR, and with the training-free text repair (NB, GNB), and the Recall@20 of each is printed.
 
 Step 3 is a demonstration of the pipeline, not a result: a 21-epoch model is far from converged (best epochs in the reported runs are 230 to 730), so the effects of VGR and of the repair that the report measures on converged models are not reliably visible in it. The reported numbers come from `scripts/run_experiments.sh`, `scripts/run_repair.sh` and the commands in `docs/reproducibility.md`.
 
@@ -123,15 +125,15 @@ Step 3 is a demonstration of the pipeline, not a result: a 21-epoch model is far
 `docs/literature.md`, `docs/references.bib`.
 
 ## AI use
-I used Claude Code (Anthropic CLI, model Claude Sonnet 5.5) for boilerplate code, the general repository layout, and running the code. The design and evaluation of the contrastive detector, the real-text experiment and the decomposition analysis (why M3 trails M1 on real titles) are my own work, as are the literature work, the report and the review; the AI only edited those. The AI also did the debugging. I remain responsible for reading the sources, checking the citations, and defending the conclusions.
+I used Claude Code (Anthropic CLI, model Claude Sonnet 5.5) to write the code and to run it. I chose the approach: a layered (DDD-style) structure and test-driven (TDD-style) development. Under my direction Claude Code wrote the package structure, the analysis scripts and the tests, and it ran the experiments; I checked the results. The design and evaluation of the contrastive detector, the real-text experiment and the decomposition analysis (why GNB trails NB on real titles) are my own work, as are the literature work, the report and the review; the AI only edited those. The AI also did the debugging. I remain responsible for reading the sources, checking the citations, and defending the conclusions.
 
 | Area | Contribution |
 |---|---|
-| Boilerplate and repo layout (AI) | Boilerplate code, package structure, scripts and test scaffolding, general repository organisation |
+| Code (AI, under my direction) | Package structure, analysis scripts and tests, written by Claude Code in a layered (DDD-style), test-driven (TDD-style) design that I specified; I checked the results |
 | Running the code (AI) | Executed the experiment grid and generated the evaluation tables and figures |
 | Contrastive detector (author) | Design and evaluation |
 | Real-text experiment (author) | Design and evaluation |
-| Decomposition analysis (author) | Design and evaluation of the analysis of why M3 trails M1 on real titles |
+| Decomposition analysis (author) | Design and evaluation of the analysis of why GNB trails NB on real titles |
 | Literature (author) | Literature work done by the author; the AI only edited the text |
 | Debugging | Diagnosed training behavior in the `improved` mode and assisted with adjustments |
 | Report (author) | Written by the author; the AI only edited it |
