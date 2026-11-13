@@ -124,22 +124,5 @@ Step 3 is a demonstration of the pipeline, not a result: a 21-epoch model is far
 ## Literature
 `docs/literature.md`, `docs/references.bib`.
 
-## AI use
-I used Claude Code (Anthropic CLI, model Claude Sonnet 5.5) to write the code and to run it. I chose the approach: a layered (DDD-style) structure and test-driven (TDD-style) development. Under my direction Claude Code wrote the package structure, the analysis scripts and the tests, and it ran the experiments; I checked the results. The design and evaluation of the contrastive detector, the real-text experiment and the decomposition analysis (why GNB trails NB on real titles) are my own work, as are the literature work, the report and the review; the AI only edited those. The AI also did the debugging. I remain responsible for reading the sources, checking the citations, and defending the conclusions.
-
-| Area | Contribution |
-|---|---|
-| Code (AI, under my direction) | Package structure, analysis scripts and tests, written by Claude Code in a layered (DDD-style), test-driven (TDD-style) design that I specified; I checked the results |
-| Running the code (AI) | Executed the experiment grid and generated the evaluation tables and figures |
-| Contrastive detector (author) | Design and evaluation |
-| Real-text experiment (author) | Design and evaluation |
-| Decomposition analysis (author) | Design and evaluation of the analysis of why GNB trails NB on real titles |
-| Literature (author) | Literature work done by the author; the AI only edited the text |
-| Debugging | Diagnosed training behavior in the `improved` mode and assisted with adjustments |
-| Report (author) | Written by the author; the AI only edited it |
-| Review (author) | Done by the author; the AI only edited it |
-
-The same disclosure is in the report, section "Use of AI Tools", and in the separate AI usage statement.
-
 ## Credit
 MAMEX paper and code: see "Source paper and code" at the top. Data: Amazon Baby item cold-start split as distributed by the MAMEX authors (features from LATTICE).
