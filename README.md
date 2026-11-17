@@ -1,5 +1,7 @@
 # MAMEX robustness analysis
 
+**Submitted version:** tag `v1.0` of this repository.
+
 Reproduction of MAMEX (Multi-modal Adaptive Mixture of Experts for Cold-start Recommendation, CIKM 2025) on Amazon Baby, a stress test with corrupted text on cold items, and a proposed fix, Visual Grounding Regularization (VGR).
 
 ## In short
