@@ -1,0 +1,691 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Corrupted Text in Cold Start</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a one-screen presenter app. Header with the five talk sections, a stage that builds step by step, a footer with step controls. */
+:root {
+  --bg: #EEF1F6; --surface: #FFFFFF; --ink: #16203A; --muted: #5B6782; --line: #D3DAE6; --soft: #E3E8F1;
+  --clean: #2F6FDB; --bad: #E2602F; --fix: #159B72; --img: #7A5AD6; --txt: #0C93AA; --warn: #C98A06;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0D1220; --surface: #151C2D; --ink: #E8EDF7; --muted: #95A2BD; --line: #2A3552; --soft: #1D263B;
+  --clean: #5B92F0; --bad: #F07A4A; --fix: #2DC593; --img: #A08AF0; --txt: #2BB8CF; --warn: #E8B33A; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0D1220; --surface: #151C2D; --ink: #E8EDF7; --muted: #95A2BD; --line: #2A3552; --soft: #1D263B;
+  --clean: #5B92F0; --bad: #F07A4A; --fix: #2DC593; --img: #A08AF0; --txt: #2BB8CF; --warn: #E8B33A; color-scheme: dark }
+
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: clamp(14px, 0.85vw + 4px, 21px); line-height: 1.45; }
+.app { height: 100%; display: grid; grid-template-rows: auto 1fr auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--clean); outline-offset: 2px; }
+
+/* header */
+.top { display: flex; align-items: center; gap: 1rem; padding-block: .7rem; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.brand { font-family: var(--f-mono); font-size: .72em; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.tabs { display: flex; gap: .3rem; flex-wrap: wrap; margin-left: auto; }
+.tab { border: 1px solid transparent; background: none; border-radius: 999px; padding: .25em .8em; font-size: .78em; color: var(--muted); display: flex; gap: .45em; align-items: center; }
+.tab b { font-family: var(--f-mono); font-weight: 600; }
+.tab[aria-current="true"] { border-color: var(--ink); color: var(--ink); }
+.tab.backup { border-style: dashed; border-color: var(--line); }
+
+/* stage */
+.stage { overflow-y: auto; overflow-x: hidden; position: relative; min-height: 0; }
+.scene { display: none; min-height: 100%; padding-block: clamp(1rem, 3vh, 2.4rem); flex-direction: column; gap: clamp(.8rem, 2.4vh, 1.8rem); max-width: 1500px; margin-inline: auto; }
+.scene.active { display: flex; }
+.kicker { font-family: var(--f-mono); font-size: .75em; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: flex; gap: .8em; align-items: center; flex-wrap: wrap; }
+.kicker .num { display: inline-grid; place-items: center; width: 1.9em; height: 1.9em; border-radius: 50%; background: var(--ink); color: var(--bg); font-weight: 600; letter-spacing: 0; }
+.kicker .time { color: var(--muted); opacity: .8; }
+h1, h2 { font-family: var(--f-display); font-weight: 800; letter-spacing: -.02em; text-wrap: balance; margin: 0; line-height: 1.04; }
+h2 { font-size: clamp(1.7em, 2.6vw, 2.6em); max-width: 26ch; }
+.lede { color: var(--muted); max-width: 62ch; margin: 0; }
+
+.grid { display: grid; gap: clamp(.8rem, 1.6vw, 1.6rem); align-items: stretch; }
+.g3 { grid-template-columns: 1.15fr 1fr 1fr; }
+.g2 { grid-template-columns: 1.2fr 1fr; }
+.g2e { grid-template-columns: 1fr 1fr; }
+.grid > * { min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: clamp(.9rem, 1.4vw, 1.4rem); display: flex; flex-direction: column; gap: .8rem; }
+.label { font-family: var(--f-mono); font-size: .68em; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.why { font-size: .92em; margin: 0; }
+.why strong { font-weight: 600; }
+.foot { font-size: .72em; color: var(--muted); margin: 0; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+
+/* build steps */
+[data-at] { transition: opacity .5s ease, transform .5s ease; }
+[data-at]:not(.on) { opacity: 0; transform: translateY(10px); pointer-events: none; }
+[data-frame].off { display: none !important; }
+
+/* big figure */
+.big { font-family: var(--f-display); font-weight: 800; font-size: clamp(2.6em, 4.4vw, 4.6em); line-height: .95; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.big.bad { color: var(--bad); } .big.fix { color: var(--fix); } .big.clean { color: var(--clean); }
+
+/* title scene */
+.title-wrap { display: grid; grid-template-columns: 1.3fr 1fr; gap: 2.5rem; align-items: center; flex: 1; }
+.title-wrap > * { min-width: 0; }
+.title-wrap h1 { font-size: clamp(2.2em, 4.2vw, 4.4em); max-width: 18ch; }
+.title-wrap h1 em { font-style: normal; color: var(--bad); }
+.sub { font-size: 1.15em; color: var(--muted); margin: 1rem 0 0; }
+.byline { margin-top: 1.6rem; font-size: .85em; display: flex; flex-direction: column; gap: .2rem; }
+.byline .mono { color: var(--muted); font-size: .9em; overflow-wrap: anywhere; }
+.agenda { display: flex; flex-direction: column; gap: .7rem; }
+.ag { display: grid; grid-template-columns: auto 1fr; gap: .9rem; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: .8rem 1rem; text-align: left; animation: rise .6s both; }
+.ag:nth-child(2) { animation-delay: .1s } .ag:nth-child(3) { animation-delay: .2s } .ag:nth-child(4) { animation-delay: .3s } .ag:nth-child(5) { animation-delay: .4s }
+.ag .n { font-family: var(--f-mono); font-weight: 600; width: 2em; height: 2em; border-radius: 50%; display: grid; place-items: center; background: var(--soft); }
+.ag .t { font-weight: 600; } .ag .t small { display: block; font-weight: 400; color: var(--muted); font-size: .82em; }
+.ag .tm { font-family: var(--f-mono); font-size: .75em; color: var(--muted); }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+/* item card */
+.item { display: grid; grid-template-columns: 6.5em 1fr; gap: .9rem; align-items: center; }
+.thumb { aspect-ratio: 1; max-width: 100%; border-radius: 10px; background: var(--soft); display: grid; place-items: center; border: 2px solid var(--img); }
+.thumb svg { width: 78%; }
+.itxt { border: 2px solid var(--txt); border-radius: 10px; padding: .55em .7em; font-size: .88em; min-height: 3.4em; position: relative; transition: border-color .4s, color .4s; }
+.itxt .clean-t, .itxt .bad-t { transition: opacity .35s; }
+.itxt .bad-t { position: absolute; inset: .55em .7em; opacity: 0; color: var(--bad); font-weight: 600; }
+.scene[data-step="1"] .itxt, .scene[data-step="2"] .itxt, .scene[data-step="3"] .itxt { border-color: var(--bad); }
+.scene[data-step="1"] .itxt .clean-t, .scene[data-step="2"] .itxt .clean-t, .scene[data-step="3"] .itxt .clean-t { opacity: 0; }
+.scene[data-step="1"] .itxt .bad-t, .scene[data-step="2"] .itxt .bad-t, .scene[data-step="3"] .itxt .bad-t { opacity: 1; animation: glitch .6s steps(2) 2; }
+@keyframes glitch { 0% { transform: translateX(-2px); } 50% { transform: translateX(3px); filter: blur(.5px); } 100% { transform: none; } }
+.chips { display: flex; gap: .4rem; flex-wrap: wrap; }
+.chip { font-family: var(--f-mono); font-size: .7em; padding: .2em .6em; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.chip.img { border-color: var(--img); color: var(--img); } .chip.txt { border-color: var(--txt); color: var(--txt); }
+.chip.bad { border-color: var(--bad); color: var(--bad); } .chip.fix { border-color: var(--fix); color: var(--fix); }
+.dots { display: grid; grid-template-columns: repeat(25, 1fr); gap: 3px; }
+.dots i { aspect-ratio: 1; border-radius: 50%; background: var(--txt); opacity: .55; transition: background .4s, opacity .4s, transform .4s; }
+.dots i.hit { background: var(--bad); opacity: 1; transform: scale(1.15); }
+
+/* gate meter */
+.gate { display: flex; flex-direction: column; gap: .5rem; }
+.gbar { display: flex; height: 2.4em; border-radius: 8px; overflow: hidden; font-family: var(--f-mono); font-size: .8em; font-weight: 600; color: #fff; }
+.gbar span { display: flex; align-items: center; padding-inline: .6em; transition: flex-basis 1.4s cubic-bezier(.3,.7,.2,1); white-space: nowrap; overflow: hidden; }
+.gbar .gi { background: var(--img); } .gbar .gt { background: var(--txt); justify-content: flex-end; }
+.gbar.corr .gt { background: repeating-linear-gradient(135deg, var(--txt) 0 8px, var(--bad) 8px 16px); }
+.grow { display: grid; grid-template-columns: 5.5em 1fr; gap: .6rem; align-items: center; font-size: .82em; }
+.grow .label { font-size: .78em; }
+.callout { border-left: 3px solid var(--bad); padding-left: .7rem; font-size: .88em; margin: 0; }
+.callout.fix { border-color: var(--fix); }
+
+/* vertical bars */
+.bars { display: flex; align-items: flex-end; gap: 1rem; height: 11em; padding-top: 1.4em; border-bottom: 1px solid var(--line); }
+.bar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: .3rem; }
+.bar .v { font-family: var(--f-mono); font-size: .78em; font-weight: 600; }
+.bar .col { width: 100%; max-width: 5em; border-radius: 6px 6px 0 0; height: 0; transition: height 1.1s cubic-bezier(.3,.7,.2,1); }
+.barlabels { display: flex; gap: 1rem; font-size: .72em; color: var(--muted); text-align: center; }
+.barlabels span { flex: 1; }
+
+/* diagram */
+.diagram { width: 100%; height: auto; display: block; }
+.diagram .box { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
+.diagram .box.img { stroke: var(--img); stroke-width: 2.2; } .diagram .box.txt { stroke: var(--txt); stroke-width: 2.2; }
+.diagram .box.add { stroke: var(--clean); stroke-dasharray: 6 4; stroke-width: 2; }
+.diagram .t { fill: var(--ink); font-family: var(--f-body); font-size: 15px; font-weight: 600; }
+.diagram .s { fill: var(--muted); font-family: var(--f-mono); font-size: 11.5px; }
+.diagram .sa { fill: var(--clean); font-family: var(--f-mono); font-size: 11.5px; }
+.diagram .edge { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+.diagram .edge.add { stroke: var(--clean); stroke-dasharray: 5 4; }
+.diagram .flow { stroke-width: 3; fill: none; stroke-dasharray: 3 22; stroke-linecap: round; animation: flow 1.4s linear infinite; }
+.diagram .flow.i { stroke: var(--img); } .diagram .flow.x { stroke: var(--txt); } .diagram .flow.o { stroke: var(--ink); }
+@keyframes flow { to { stroke-dashoffset: -25; } }
+.diagram .arrowhead { fill: var(--muted); } .diagram .arrowhead.add { fill: var(--clean); }
+
+/* reproduction */
+.repro { display: flex; flex-direction: column; gap: .7rem; }
+.rrow { display: grid; grid-template-columns: 6.2em 1fr auto; gap: .8rem; align-items: center; padding: .6rem .8rem; border-radius: 10px; background: var(--soft); }
+.rrow .k { font-family: var(--f-mono); font-weight: 600; font-size: .9em; }
+.rrow .vs { font-family: var(--f-mono); font-size: .85em; font-variant-numeric: tabular-nums; }
+.rrow .vs b { font-size: 1.15em; }
+.badge { font-family: var(--f-mono); font-size: .72em; font-weight: 600; padding: .25em .6em; border-radius: 6px; white-space: nowrap; }
+.badge.ok { background: var(--fix); color: var(--surface); } .badge.no { background: var(--bad); color: var(--surface); }
+.ruled { display: flex; gap: .4rem; flex-wrap: wrap; }
+.ruled span { font-family: var(--f-mono); font-size: .72em; padding: .2em .55em; border-radius: 6px; border: 1px solid var(--line); text-decoration: line-through; text-decoration-color: var(--bad); color: var(--muted); }
+.why3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
+.why3 div { background: var(--soft); border-radius: 10px; padding: .6rem .7rem; font-size: .82em; }
+.why3 b { display: block; font-family: var(--f-display); font-size: 1.1em; }
+
+/* scatter */
+.scatter { width: 100%; height: auto; display: block; }
+/* Improvement page: keep both drawings short enough that the text under them stays on screen */
+.scene[data-key="improvement"] .diagram, .scene[data-key="improvement"] .scatter { max-height: 36vh; }
+.scene[data-key="improvement"] .seeds { max-width: 24em; }
+.scatter .w { fill: var(--muted); opacity: .45; transition: fill .4s, opacity .4s, r .4s; }
+.scatter .w.nn { fill: var(--fix); opacity: 1; }
+.scatter .ln { stroke: var(--fix); stroke-width: 1.4; stroke-dasharray: 160; stroke-dashoffset: 160; transition: stroke-dashoffset .7s ease; }
+.scatter.go .ln { stroke-dashoffset: 0; }
+.scatter .cold { fill: var(--bad); transition: fill .6s 1.6s; }
+.scatter.go .cold { fill: var(--fix); }
+.scatter .halo { fill: none; stroke: var(--bad); stroke-width: 2; stroke-dasharray: 4 3; transition: stroke .6s 1.6s; }
+.scatter.go .halo { stroke: var(--fix); }
+.scatter .lab { font-family: var(--f-mono); font-size: 11px; fill: var(--muted); }
+.scatter .labk { font-family: var(--f-mono); font-size: 11px; fill: var(--ink); font-weight: 600; }
+
+/* recovery */
+.recov { display: flex; flex-direction: column; gap: .5rem; }
+.track { position: relative; height: 2.6em; background: var(--soft); border-radius: 8px; overflow: hidden; }
+.track .lost { position: absolute; inset: 0 auto 0 0; width: 100%; background: repeating-linear-gradient(135deg, transparent 0 7px, color-mix(in srgb, var(--bad) 35%, transparent) 7px 14px); border: 2px solid var(--bad); border-radius: 8px; }
+.track .got { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--fix); border-radius: 6px; transition: width 1.6s cubic-bezier(.3,.7,.2,1); display: flex; align-items: center; justify-content: flex-end; padding-right: .6em; color: var(--surface); font-family: var(--f-mono); font-weight: 600; font-size: .85em; white-space: nowrap; }
+.seeds { display: grid; grid-template-columns: repeat(15, 1fr); gap: 4px; }
+.seeds i { aspect-ratio: 1; border-radius: 4px; background: var(--soft); transition: background .3s; }
+.seeds i.ok { background: var(--fix); }
+.stats { display: flex; gap: 1.4rem; flex-wrap: wrap; }
+.stat b { display: block; font-family: var(--f-display); font-size: 1.6em; line-height: 1.05; }
+.stat span { font-size: .75em; color: var(--muted); }
+
+/* catch */
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; gap: 3px; flex-wrap: wrap; }
+.seg button { border: 0; background: none; border-radius: 999px; padding: .3em .9em; font-size: .8em; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.auc { display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; }
+.hbars { display: flex; flex-direction: column; gap: .45rem; }
+.hb { display: grid; grid-template-columns: 11em 1fr 4.2em; gap: .6rem; align-items: center; font-size: .8em; transition: opacity .4s; }
+.hb .tr { height: 1.3em; background: var(--soft); border-radius: 4px; overflow: hidden; }
+.hb .fl { height: 100%; width: 0; border-radius: 4px; transition: width 1s cubic-bezier(.3,.7,.2,1); }
+.hb .vv { font-family: var(--f-mono); font-weight: 600; text-align: right; }
+.hb.dim { opacity: .35; }
+
+/* literature */
+.lit tbody tr { animation: rise .45s both; animation-delay: var(--d); }
+.lit td:last-child { font-weight: 600; }
+.lit td.n::before { content: "✕ "; color: var(--muted); }
+.lit td.y::before { content: "◐ "; }
+.scene[data-step="1"] .lit tr.me td { background: color-mix(in srgb, var(--fix) 14%, transparent); }
+.scene[data-step="1"] .lit td:last-child { color: var(--bad); }
+.scene[data-step="1"] .lit td.y { color: var(--warn); }
+
+/* close */
+.recap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.recap .panel { animation: rise .6s both; }
+.recap .panel:nth-child(2) { animation-delay: .12s } .recap .panel:nth-child(3) { animation-delay: .24s }
+.answer { font-family: var(--f-display); font-size: clamp(1.4em, 2.2vw, 2.1em); font-weight: 700; line-height: 1.15; max-width: 32ch; text-wrap: balance; margin: 0; }
+.answer mark { background: none; color: var(--fix); }
+.limits { display: flex; gap: .6rem; flex-wrap: wrap; font-size: .8em; color: var(--muted); }
+.limits span { border: 1px dashed var(--line); border-radius: 8px; padding: .3em .7em; }
+
+/* footer */
+.bottom { display: flex; align-items: center; gap: 1rem; padding-block: .6rem; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.nav { display: flex; gap: .4rem; }
+.nav button { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: .35em .9em; font-size: .85em; }
+.nav button.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.stepdots { display: flex; gap: 5px; }
+.stepdots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+.stepdots i.on { background: var(--ink); }
+.hint { font-size: .7em; color: var(--muted); margin-left: auto; }
+
+/* overlays */
+.overlay { position: fixed; inset: 0; background: color-mix(in srgb, var(--bg) 70%, transparent); backdrop-filter: blur(4px); display: grid; place-items: center; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); z-index: 20; }
+.sheet { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; width: min(1100px, 100%); max-height: 100%; overflow: auto; padding: 1.4rem; display: flex; flex-direction: column; gap: 1rem; }
+.sheet header { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.sheet header .x { margin-left: auto; border: 1px solid var(--line); background: none; border-radius: 8px; padding: .2em .7em; }
+.tblwrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .82em; }
+th, td { text-align: left; padding: .5em .7em; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--f-mono); font-size: .8em; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 500; }
+td.y { color: var(--warn); } td.n { color: var(--muted); }
+tr.me td { background: var(--soft); }
+ol.refs { margin: 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: .4rem; font-size: .85em; }
+ol.refs li { animation: rise .45s both; animation-delay: var(--d); }
+ol.refs b { font-family: var(--f-mono); color: var(--muted); margin-right: .4em; }
+.notes { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; background: var(--surface); border-top: 2px solid var(--ink); padding: .9rem max(16px, env(safe-area-inset-right, 0px)) calc(.9rem + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); max-height: 40vh; overflow: auto; font-size: .9em; box-shadow: 0 -10px 30px rgba(0,0,0,.12); }
+.notes .label { margin-bottom: .3rem; display: block; }
+.notes p { margin: 0; max-width: 90ch; }
+
+@media (max-width: 900px) {
+  .g3, .g2, .g2e, .title-wrap, .recap { grid-template-columns: 1fr; }
+  .why3 { grid-template-columns: 1fr; }
+  .hb { grid-template-columns: 8em 1fr 3.6em; }
+  .hint { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <span class="brand">YZM5110 · MAMEX robustness</span>
+    <nav class="tabs" id="tabs" aria-label="Talk sections"></nav>
+  </header>
+
+  <main class="stage" id="stage">
+
+    <!-- 0 · TITLE -->
+    <section class="scene" data-key="intro" data-steps="1">
+      <div class="title-wrap">
+        <div>
+          <div class="kicker">YZM5110 Research Project</div>
+          <h1 style="margin-top:.8rem">Corrupted text in cold-start recommendation: <em>what do the gains depend on?</em></h1>
+          <p class="sub">A robustness study of MAMEX (CIKM 2025)</p>
+          <div class="byline">
+            <span>Hatice Sebla Karabunar</span>
+            <span class="mono">github.com/karabunar/multimodal-coldstart-recsys-robustness</span>
+          </div>
+        </div>
+        <div class="agenda">
+          <div class="label">One question, three parts</div>
+          <div class="ag"><span class="n">1</span><span class="t">Topic<small>What if the text exists but is wrong?</small></span></div>
+          <div class="ag"><span class="n">·</span><span class="t">Literature<small>The gap this work fills</small></span></div>
+          <div class="ag"><span class="n">2</span><span class="t">Paper<small>MAMEX, and does it reproduce?</small></span></div>
+          <div class="ag"><span class="n">3</span><span class="t">Improvement<small>A test-time repair, and its limit</small></span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1 · TOPIC -->
+    <section class="scene" data-key="topic" data-steps="4">
+      <div class="kicker"><span class="num">1</span> Topic</div>
+      <h2>What if the text exists but is wrong?</h2>
+      <div class="grid g3">
+        <div class="panel" data-at="0">
+          <span class="label">A cold item in Amazon Baby</span>
+          <div class="item">
+            <div class="thumb" aria-label="Product image">
+              <svg viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="var(--img)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 30 h14 l10 34 h34"/><path d="M40 44 h44 a4 4 0 0 1 0 8 l-6 12"/><path d="M84 44 c0-18-14-28-30-28 v28"/><circle cx="46" cy="78" r="8"/><circle cx="78" cy="78" r="8"/></g></svg>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.5rem;min-width:0">
+              <div class="itxt"><span class="clean-t">Lightweight compact stroller, one-hand fold, reclining seat</span><span class="bad-t">#sale #musthave #viral #best #gift #deal</span></div>
+              <div class="chips"><span class="chip img">image</span><span class="chip txt">text</span><span class="chip">0 clicks</span></div>
+            </div>
+          </div>
+          <p class="why"><strong>Why it matters.</strong> A new item has no clicks, so the model trusts its image and text. Text can be clickbait, but MAMEX was only tested on clean features.</p>
+          <div data-at="1" style="display:flex;flex-direction:column;gap:.45rem">
+            <span class="label">Stress test: corrupt 40% of cold items' text, at test time only</span>
+            <div class="dots" id="dots" aria-label="50 cold items, 20 corrupted"></div>
+          </div>
+        </div>
+
+        <div class="panel" data-at="2">
+          <span class="label">Does the gate notice?</span>
+          <div class="gate">
+            <div class="grow"><span class="label">Clean</span><div class="gbar"><span class="gi" style="flex-basis:45%">img 0.450</span><span class="gt" style="flex-basis:55%">txt 0.550</span></div></div>
+            <div class="grow"><span class="label">Corrupted</span><div class="gbar corr" id="gateCorr"><span class="gi" style="flex-basis:45%">img</span><span class="gt" style="flex-basis:55%" id="gateTxt">txt 0.550</span></div></div>
+          </div>
+          <p class="callout"><strong>No.</strong> The text weight goes <span class="mono">0.550 → 0.563</span>. It moves slightly <em>toward</em> the corrupted text.</p>
+          <p class="why" style="color:var(--muted)">The gate is nearly constant across cold items (std of the text weight 0.050), so it cannot react item by item.</p>
+          <p class="foot">w<sub>img</sub> + w<sub>txt</sub> = 1</p>
+        </div>
+
+        <div class="panel" data-at="3">
+          <span class="label">Finding · Recall@20 on 1,410 cold items</span>
+          <div class="big bad mono" id="dropBig">−12–15%</div>
+          <div class="bars" id="recallBars">
+            <div class="bar"><span class="v">0.0776</span><div class="col" style="background:var(--clean)" data-h="0.0776"></div></div>
+            <div class="bar"><span class="v">0.0668</span><div class="col" style="background:var(--bad)" data-h="0.0668"></div></div>
+          </div>
+          <div class="barlabels"><span>Clean</span><span>40% text corrupted</span></div>
+          <p class="foot">3 seeds: 0.0776 → 0.0668 (−14%). 15 seeds: 0.0770 → 0.0677 (−12%). Corruption is simulated on the text embedding; 41 real clickbait strings give the same picture.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- LITERATURE -->
+    <section class="scene" data-key="literature" data-steps="2">
+      <div class="kicker">Literature</div>
+      <h2>No paper tests misleading text on cold items</h2>
+      <div class="panel lit">
+        <div class="tblwrap"><table>
+          <thead><tr><th>Paper</th><th>What it does</th><th>Misleading text?</th></tr></thead>
+          <tbody>
+          <tr style="--d:0.00s" class="me"><td><b>MAMEX</b> [1]</td><td>Image/text mixture of experts with a gate</td><td class="n">No, clean only</td></tr>
+          <tr style="--d:0.09s"><td>VBPR [2]</td><td>Image CNN features as extra factors in BPR-MF</td><td class="n">No (image only)</td></tr>
+          <tr style="--d:0.18s"><td>MMGCN [3]</td><td>One graph convolution network per modality</td><td class="n">No</td></tr>
+          <tr style="--d:0.27s"><td>CLCRec [4]</td><td>Contrastive content-collaborative objectives</td><td class="n">No</td></tr>
+          <tr style="--d:0.36s"><td>MoToRec [5]</td><td>Discrete tokens plus LightGCN</td><td class="n">No</td></tr>
+          <tr style="--d:0.45s"><td>MILK [6]</td><td>Dirichlet-weighted fusion, one modality missing</td><td class="y">Missing yes, misleading no</td></tr>
+          <tr style="--d:0.54s"><td>DGMRec [7]</td><td>Disentangle, then generate the missing feature</td><td class="y">Missing yes, misleading no</td></tr>
+          <tr style="--d:0.63s"><td>Li [9]</td><td>Shuffles item features; warm items, random splits</td><td class="y">Closest; no cold items</td></tr>
+          <tr style="--d:0.72s"><td>Zhong [10]</td><td>Trains for robustness to input noise</td><td class="y">Related; no cold-start gate</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <p class="callout fix" data-at="1">My claim is narrow: a present-but-misleading modality, on the gate of a cold-start model, at test time, with controls.</p>
+      <p class="foot">Targeted reading of 9 papers, not a systematic review. Cold-start definitions differ, so reported numbers are not comparable. Full 7-field matrix: report, Appendix C.</p>
+    </section>
+
+    <!-- 2 · PAPER -->
+    <section class="scene" data-key="paper" data-steps="3">
+      <div class="kicker"><span class="num">2</span> Paper</div>
+      <h2>MAMEX: a gate weighs image against text</h2>
+      <div class="grid g2">
+        <div class="panel" data-at="0">
+          <span class="label">Why this paper</span>
+          <div class="why3">
+            <div><b>A gate</b>between an image expert and a text expert</div>
+            <div><b>Strictest</b>cold start: the test items have no interactions</div>
+            <div><b>Public code</b>so the results can be checked</div>
+          </div>
+          <svg class="diagram" viewBox="0 0 700 250" role="img" aria-label="MAMEX: image expert and text expert feed a gate, which produces the item vector matched against users">
+            <defs>
+              <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arrowhead" d="M0 0 L10 5 L0 10z"/></marker>
+            </defs>
+            <path class="edge" d="M160 55 C 230 55, 230 112, 282 118" marker-end="url(#ah)"/>
+            <path class="edge" d="M160 195 C 230 195, 230 138, 282 132" marker-end="url(#ah)"/>
+            <path class="edge" d="M402 125 L 448 125" marker-end="url(#ah)"/>
+            <path class="edge" d="M568 125 L 590 125" marker-end="url(#ah)"/>
+            <path class="flow i" d="M160 55 C 230 55, 230 112, 282 118"/>
+            <path class="flow x" d="M160 195 C 230 195, 230 138, 282 132"/>
+            <path class="flow o" d="M402 125 L 448 125"/>
+            <rect class="box img" x="20" y="30" width="140" height="50" rx="10"/><text class="t" x="90" y="60" text-anchor="middle">Image expert</text>
+            <rect class="box txt" x="20" y="170" width="140" height="50" rx="10"/><text class="t" x="90" y="200" text-anchor="middle">Text expert</text>
+            <rect class="box" x="284" y="98" width="118" height="54" rx="27"/><text class="t" x="343" y="130" text-anchor="middle">Gate</text>
+            <text class="s" x="343" y="175" text-anchor="middle">w_img + w_txt = 1</text>
+            <rect class="box" x="450" y="100" width="118" height="50" rx="10"/><text class="t" x="509" y="130" text-anchor="middle">Item vector</text>
+            <rect class="box" x="592" y="100" width="100" height="50" rx="10"/><text class="t" x="642" y="130" text-anchor="middle">User match</text>
+          </svg>
+          <p class="foot">Released model, unchanged. Trained on Amazon Baby: 7,050 items, 1,410 cold.</p>
+        </div>
+        <div class="panel" data-at="1">
+          <span class="label">Finding · does it reproduce?</span>
+          <div class="repro">
+            <div class="rrow"><span class="k">Recall@20</span><span class="vs">mine <b>0.0776</b> · paper 0.0771</span><span class="badge ok">matches</span></div>
+            <div class="rrow" data-at="2"><span class="k">Recall@10</span><span class="vs">mine <b>0.0486</b> · paper 0.0512</span><span class="badge no">0 / 15 seeds</span></div>
+          </div>
+          <div data-at="2" style="display:flex;flex-direction:column;gap:.5rem">
+            <span class="label">Ruled out as the cause</span>
+            <div class="ruled"><span>seed</span><span>loss scale</span><span>epoch rule</span><span>candidate set</span></div>
+            <p class="callout">Recall@10 does not match in any of 15 seeds. The cause is still not found, and I report it as open.</p>
+          </div>
+          <p class="foot">My measurements; published numbers from the MAMEX paper [1].</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 · IMPROVEMENT -->
+    <section class="scene" data-key="improvement" data-steps="5">
+      <div class="kicker"><span class="num">3</span> Improvement</div>
+      <h2 id="impTitle">A test-time repair. Nothing is trained.</h2>
+      <div class="grid g2e" data-frame="0-1">
+        <div class="panel" data-at="0">
+          <span class="label">Two additions to the gate (dashed)</span>
+          <svg class="diagram" viewBox="0 0 700 290" role="img" aria-label="VGR compares image and text and lowers the text weight; GNB replaces flagged text with neighbour text before the gate">
+            <defs>
+              <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arrowhead" d="M0 0 L10 5 L0 10z"/></marker>
+              <marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arrowhead add" d="M0 0 L10 5 L0 10z"/></marker>
+            </defs>
+            <path class="edge" d="M140 45 C 330 45, 360 100, 420 118" marker-end="url(#ah2)"/>
+            <path class="edge" d="M140 245 L 198 245" marker-end="url(#ah2)"/>
+            <path class="edge add" d="M318 245 C 380 245, 380 150, 420 136" marker-end="url(#ah3)"/>
+            <path class="edge add" d="M110 70 C 140 120, 170 135, 198 135" marker-end="url(#ah3)"/>
+            <path class="edge add" d="M110 220 C 140 170, 170 140, 198 140"/>
+            <path class="edge add" d="M318 128 L 418 128" marker-end="url(#ah3)"/>
+            <path class="edge add" d="M258 160 L 258 218" marker-end="url(#ah3)"/>
+            <path class="edge" d="M538 128 L 572 128" marker-end="url(#ah2)"/>
+            <path class="flow i" d="M140 45 C 330 45, 360 100, 420 118"/>
+            <path class="flow x" d="M140 245 L 198 245"/>
+            <path class="flow x" d="M318 245 C 380 245, 380 150, 420 136"/>
+            <rect class="box img" x="10" y="20" width="130" height="50" rx="10"/><text class="t" x="75" y="50" text-anchor="middle">Image expert</text>
+            <rect class="box txt" x="10" y="220" width="130" height="50" rx="10"/><text class="t" x="75" y="250" text-anchor="middle">Text expert</text>
+            <rect class="box add" x="200" y="100" width="118" height="58" rx="10"/><text class="t" x="259" y="126" text-anchor="middle">VGR</text><text class="sa" x="259" y="145" text-anchor="middle">image ≠ text?</text>
+            <rect class="box add" x="200" y="218" width="118" height="56" rx="10"/><text class="t" x="259" y="244" text-anchor="middle">GNB repair</text><text class="sa" x="259" y="262" text-anchor="middle">flagged only</text>
+            <text class="sa" x="266" y="194">flag</text>
+            <text class="sa" x="324" y="120">lower w_txt</text>
+            <rect class="box" x="420" y="100" width="118" height="56" rx="28"/><text class="t" x="479" y="133" text-anchor="middle">Gate</text>
+            <rect class="box" x="574" y="103" width="118" height="50" rx="10"/><text class="t" x="633" y="133" text-anchor="middle">Item vector</text>
+          </svg>
+          <p class="why"><strong>VGR</strong> (Visual Grounding Regularization) lowers the text weight when image and text disagree. <strong>GNB</strong> (Gated Neighbour Blend) blends in the text of the 10 visually nearest warm items, for flagged items only.</p>
+          <p class="foot">Applied at evaluation time only. VGR, NB and GNB are my own designs and names.</p>
+        </div>
+        <div class="panel" data-at="1">
+          <span class="label">How GNB repairs one flagged item</span>
+          <svg class="scatter" id="scatter" viewBox="0 0 440 300" role="img" aria-label="Image-embedding space: a flagged cold item borrows text from its 10 nearest warm neighbours"></svg>
+          <div class="chips"><span class="chip">warm item</span><span class="chip bad">flagged cold item</span><span class="chip fix">10 nearest by image</span></div>
+          <p class="why">The image is trusted to find neighbours. Their text replaces part of the corrupted text. About 0.6 s for all cold items.</p>
+        </div>
+      </div>
+
+      <div class="grid g2e" data-frame="2-4">
+        <div class="panel" data-at="2">
+          <span class="label">Result · released, transductive setting</span>
+          <div style="display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap"><span class="big fix mono" id="pctBig">85%</span><span>of the Recall@20 loss recovered</span></div>
+          <div class="recov">
+            <div class="track"><div class="lost"></div><div class="got" id="got">+0.0078</div></div>
+            <div class="barlabels" style="justify-content:space-between"><span style="flex:none">0.0677 corrupted</span><span style="flex:none">loss 0.0093</span><span style="flex:none">0.0770 clean</span></div>
+          </div>
+          <span class="label">Beats the unrepaired model in every seed</span>
+          <div class="seeds" id="seeds"></div>
+          <div class="stats">
+            <div class="stat"><b class="mono">15 / 15</b><span>seeds</span></div>
+            <div class="stat"><b class="mono">≈0.6 s</b><span>runtime</span></div>
+            <div class="stat"><b class="mono">0</b><span>parameters trained</span></div>
+          </div>
+          <p class="foot">Fair comparison: an image-only fallback recovers 79%. GNB beats it by only +0.0005, but GNB keeps clean accuracy.</p>
+        </div>
+        <div class="panel" data-at="3">
+          <span class="label">The catch · were cold items in training?</span>
+          <div class="seg" role="group" aria-label="Training setting">
+            <button type="button" id="segT" aria-pressed="true">Yes · transductive</button>
+            <button type="button" id="segW" aria-pressed="false">No · warm-only</button>
+          </div>
+          <div class="auc"><span class="label">VGR detection AUROC</span><span class="big mono" id="aucBig" style="color:var(--fix)">0.999</span></div>
+          <div class="hbars" id="gainBars"></div>
+          <p class="callout" id="catchNote">Cold items' features were in the training losses, so VGR finds the corrupted ones almost perfectly.</p>
+          <p class="foot">GNB Recall@20 gain, 15 seeds. A contrastive detector reaches AUROC 0.868 but gains only +0.0014.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 · CLOSE -->
+    <section class="scene" data-key="close" data-steps="1">
+      <div class="kicker">Answer</div>
+      <p class="answer">The gains depend on the setting: GNB recovers 85% of the loss <mark>only when cold items were in training</mark>. Leave them out and the gain falls to +0.0004.</p>
+      <div class="recap">
+        <div class="panel"><span class="label">1 · Topic</span><span class="big bad mono">−12–15%</span><p class="why">Recall@20 when 40% of cold items get corrupted text. The gate keeps trusting it (0.550 → 0.563).</p></div>
+        <div class="panel"><span class="label">2 · Paper</span><span class="big clean mono">0.0776</span><p class="why">Recall@20 matches the published 0.0771. Recall@10 does not (0.0486 vs 0.0512); cause not found.</p></div>
+        <div class="panel"><span class="label">3 · Improvement</span><span class="big fix mono">85%</span><p class="why">of the loss recovered in 15 of 15 seeds, with no training. Warm-only: +0.0004.</p></div>
+      </div>
+      <div class="limits"><span>Limit: simulated corruption</span><span>Limit: Recall@10 target not reached</span><span>Amazon Baby only</span><span>Claude Code used under my direction; see the AI usage statement</span></div>
+      <p class="answer" style="font-size:1.4em;color:var(--muted)">Thank you.</p>
+    </section>
+    <!-- REFERENCES -->
+    <section class="scene" data-key="references" data-steps="1">
+      <div class="kicker">References</div>
+      <h2>Papers cited in this talk</h2>
+      <div class="panel">
+        <ol class="refs">
+          <li style="--d:0.00s"><b>[1]</b>V.-K. Nguyen et al., MAMEX, in Proc. CIKM, 2025.</li>
+          <li style="--d:0.07s"><b>[2]</b>R. He and J. McAuley, VBPR, in Proc. AAAI, 2016.</li>
+          <li style="--d:0.14s"><b>[3]</b>Y. Wei et al., MMGCN, in Proc. ACM MM, 2019.</li>
+          <li style="--d:0.21s"><b>[4]</b>Y. Wei et al., Contrastive learning for cold-start recommendation, in Proc. ACM MM, 2021.</li>
+          <li style="--d:0.28s"><b>[5]</b>J. Liu, Z. Zhang, R. C. C. Cheung, MoToRec, in Proc. AAAI, 2026.</li>
+          <li style="--d:0.35s"><b>[6]</b>H. Bai et al., Multimodality invariant learning (MILK), in Proc. SIGIR, 2024.</li>
+          <li style="--d:0.42s"><b>[7]</b>J. Kim et al., Disentangling and generating modalities (DGMRec), in Proc. SIGIR, 2025.</li>
+          <li style="--d:0.49s"><b>[9]</b>Z. Li, Towards trustworthy multimodal recommendation, arXiv:2602.00730, 2026.</li>
+          <li style="--d:0.56s"><b>[10]</b>S. Zhong et al., Mirror gradient, in Proc. WWW, 2024.</li>
+        </ol>
+      </div>
+      <p class="foot">Numbering follows the report; [8] is cited only in the reproduction section. Full list with DOIs: report, References section.</p>
+    </section>
+  </main>
+
+  <footer class="bottom">
+    <div class="nav">
+      <button type="button" id="prev" aria-label="Previous step">←</button>
+      <button type="button" id="next" class="primary" aria-label="Next step">Next →</button>
+    </div>
+    <div class="stepdots" id="stepdots" aria-hidden="true"></div>
+    <span class="hint">← → steps · N notes · R references</span>
+  </footer>
+</div>
+
+<aside class="notes" id="notes" hidden><span class="label" id="notesLabel">Speaker notes</span><p id="notesText"></p></aside>
+
+<script>
+(() => {
+  const scenes = [...document.querySelectorAll('.scene')];
+  const names = ['Intro', 'Topic', 'Literature', 'Paper', 'Improvement', 'Answer', 'References'];
+  const notes = [
+    "Hello. My project asks: if a new item's text is misleading, how much does an image-and-text recommender suffer, can it be repaired, and what does the repair depend on? I studied this on MAMEX, a CIKM 2025 model.",
+    "A new item has no click history, so the model relies on its image and text. Online text can be clickbait, and MAMEX was tested on clean features only. [→] I corrupt the text of 40 percent of the cold items at test time. [→] The gate keeps trusting the text: weight 0.550 to 0.563. [→] Recall@20 falls by 12 to 15 percent. The corruption is simulated.",
+    "This table lists the papers I read. MAMEX is the model I study. VBPR, MMGCN, CLCRec and MoToRec use image or multimodal features for cold items, all with clean inputs. MILK and DGMRec study a missing modality, at training time. None tests a modality that is present but misleading. Li and Zhong are the closest: they corrupt features, but on warm items with random splits. [→] So my claim is narrow. The selection was targeted, not a systematic review.",
+    "MAMEX is a recent cold-start model with a gate between image and text, it uses the strictest cold start, and its code is public. [→] Recall@20 matched the paper, 0.0776 against 0.0771. [→] Recall@10 did not, 0.0486 against 0.0512, in none of 15 seeds. I ruled out seed, loss scale, epoch rule and candidate set.",
+    "The gate does not notice corrupted text, so I add a repair that needs no training. VGR lowers the text weight when image and text disagree. [→] GNB blends in the text of the ten visually nearest warm items for flagged items. [→] GNB recovers 85 percent of the loss in all 15 seeds. [→] But only when the cold items were in the training loss. [→] Leave them out and detection falls from AUROC 0.999 to 0.721 and the gain to +0.0004.",
+    "So the gains depend on the setting. Limits: simulated corruption, Recall@10 target not reached. I used Claude Code under my direction; see the AI usage statement. Thank you.",
+    "Show briefly, no need to read out. These are the papers cited in the talk; the full list with DOIs is in the report."
+  ];
+  let cur = 0, step = 0;
+
+  // tabs
+  const tabs = document.getElementById('tabs');
+  names.forEach((n, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tab';
+    b.textContent = n;
+    b.addEventListener('click', () => go(i, 0));
+    tabs.appendChild(b);
+  });
+
+  // topic dots: 50 cold items, 20 corrupted (40%)
+  const dots = document.getElementById('dots');
+  const hitIdx = new Set([1, 4, 6, 9, 12, 15, 17, 20, 23, 26, 28, 31, 33, 36, 38, 41, 43, 45, 47, 49]);
+  for (let i = 0; i < 50; i++) { const d = document.createElement('i'); d.dataset.hit = hitIdx.has(i) ? 1 : 0; dots.appendChild(d); }
+
+  // seeds
+  const seedsEl = document.getElementById('seeds');
+  for (let i = 0; i < 15; i++) seedsEl.appendChild(document.createElement('i'));
+
+  // scatter: warm items in image-embedding space
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const sc = document.getElementById('scatter');
+  let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const pts = [];
+  for (let i = 0; i < 80; i++) pts.push([30 + rnd() * 380, 30 + rnd() * 235]);
+  const C = [228, 148];
+  const nn = pts.map((p, i) => [Math.hypot(p[0] - C[0], p[1] - C[1]), i]).filter(d => d[0] > 14).sort((a, b) => a[0] - b[0]).slice(0, 10).map(d => d[1]);
+  const mk = (tag, attrs) => { const e = document.createElementNS(svgNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+  nn.forEach((i, k) => { const l = mk('line', { class: 'ln', x1: C[0], y1: C[1], x2: pts[i][0], y2: pts[i][1] }); l.style.transitionDelay = (k * 0.09) + 's'; sc.appendChild(l); });
+  pts.forEach((p, i) => { const c = mk('circle', { class: 'w', cx: p[0], cy: p[1], r: 4.5 }); if (nn.includes(i)) c.dataset.nn = 1; sc.appendChild(c); });
+  sc.appendChild(mk('circle', { class: 'halo', cx: C[0], cy: C[1], r: 15 }));
+  sc.appendChild(mk('circle', { class: 'cold', cx: C[0], cy: C[1], r: 8 }));
+  const t1 = mk('text', { class: 'labk', x: C[0] + 20, y: C[1] - 18 }); t1.textContent = 'flagged cold item'; sc.appendChild(t1);
+  const t2 = mk('text', { class: 'lab', x: 12, y: 292 }); t2.textContent = 'image-embedding space · warm items'; sc.appendChild(t2);
+
+  // gain bars
+  const gains = [
+    { k: 'Transductive, VGR', v: 0.0078, set: 'T' },
+    { k: 'Warm-only, VGR', v: 0.0004, set: 'W' },
+    { k: 'Warm-only, contrastive', v: 0.0014, set: 'W' },
+    { k: 'Warm-only, perfect detection', v: 0.0029, set: 'W' }
+  ];
+  const gb = document.getElementById('gainBars');
+  gains.forEach(g => {
+    const r = document.createElement('div'); r.className = 'hb'; r.dataset.set = g.set;
+    r.innerHTML = `<span>${g.k}</span><div class="tr"><div class="fl" style="background:${g.set === 'T' ? 'var(--fix)' : 'var(--warn)'}" data-w="${g.v / 0.0085 * 100}"></div></div><span class="vv">+${g.v.toFixed(4)}</span>`;
+    gb.appendChild(r);
+  });
+  function setCatch(m) {
+    document.getElementById('segT').setAttribute('aria-pressed', m === 'T');
+    document.getElementById('segW').setAttribute('aria-pressed', m === 'W');
+    gb.querySelectorAll('.hb').forEach(r => r.classList.toggle('dim', r.dataset.set !== m));
+    const auc = document.getElementById('aucBig');
+    countTo(auc, m === 'T' ? 0.721 : 0.999, m === 'T' ? 0.999 : 0.721, 3, '', 900);
+    auc.style.color = m === 'T' ? 'var(--fix)' : 'var(--bad)';
+    document.getElementById('catchNote').textContent = m === 'T'
+      ? "Cold items' features were in the training losses, so VGR finds the corrupted ones almost perfectly. Gain +0.0078."
+      : "Leave cold items out of training: detection drops to 0.721 and the gain to +0.0004. Even perfect detection gives only +0.0029.";
+    document.getElementById('catchNote').className = m === 'T' ? 'callout fix' : 'callout';
+  }
+  document.getElementById('segT').addEventListener('click', () => setCatch('T'));
+  document.getElementById('segW').addEventListener('click', () => setCatch('W'));
+
+  function countTo(el, from, to, dec, suffix, ms, prefix = '') {
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const t0 = performance.now();
+    const tick = now => {
+      const p = reduce ? 1 : Math.min(1, (now - t0) / ms);
+      const e = 1 - Math.pow(1 - p, 3);
+      el.textContent = prefix + (from + (to - from) * e).toFixed(dec) + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  // per-scene step effects
+  function effects(i, s) {
+    const sc0 = scenes[i];
+    if (i === 1) {
+      dots.querySelectorAll('i').forEach((d, k) => {
+        const on = s >= 1 && d.dataset.hit === '1';
+        setTimeout(() => d.classList.toggle('hit', on), on ? k * 25 : 0);
+      });
+      const gt = document.getElementById('gateTxt');
+      const gi = gt.previousElementSibling;
+      if (s === 2) {
+        setTimeout(() => { gt.style.flexBasis = '56.3%'; gi.style.flexBasis = '43.7%'; }, 250);
+        countTo(gt, 0.550, 0.563, 3, '', 1400, 'txt ');
+      } else if (s > 2) { gt.style.flexBasis = '56.3%'; gi.style.flexBasis = '43.7%'; gt.textContent = 'txt 0.563'; }
+      else { gt.style.flexBasis = '55%'; gi.style.flexBasis = '45%'; gt.textContent = 'txt 0.550'; }
+      sc0.querySelectorAll('#recallBars .col').forEach(c => { c.style.height = s >= 3 ? (parseFloat(c.dataset.h) / 0.09 * 100) + '%' : '0'; });
+    }
+    if (i === 4) {
+      sc.classList.toggle('go', s >= 1);
+      sc.querySelectorAll('.w').forEach(c => c.classList.toggle('nn', s >= 1 && c.dataset.nn === '1'));
+      document.getElementById('impTitle').textContent = s >= 2 ? 'The repair works, but depends on the setting' : 'A test-time repair. Nothing is trained.';
+      const got = document.getElementById('got');
+      got.style.width = s >= 2 ? (0.0078 / 0.0093 * 100) + '%' : '0';
+      if (s === 2) countTo(document.getElementById('pctBig'), 0, 85, 0, '%', 1600);
+      seedsEl.querySelectorAll('i').forEach((d, k) => setTimeout(() => d.classList.toggle('ok', s >= 2), s >= 2 ? 300 + k * 70 : 0));
+      gb.querySelectorAll('.fl').forEach(f => f.style.width = s >= 3 ? f.dataset.w + '%' : '0');
+      if (s === 3) setCatch('T');
+      if (s === 4) setCatch('W');
+    }
+  }
+
+  function render() {
+    scenes.forEach((s, i) => s.classList.toggle('active', i === cur));
+    const sc0 = scenes[cur];
+    sc0.dataset.step = step;
+    sc0.querySelectorAll('[data-at]').forEach(e => e.classList.toggle('on', step >= +e.dataset.at));
+    sc0.querySelectorAll('[data-frame]').forEach(e => { const [a, b] = e.dataset.frame.split('-').map(Number); e.classList.toggle('off', step < a || step > b); });
+    [...tabs.children].forEach((t, i) => t.setAttribute('aria-current', i === cur));
+    const n = +sc0.dataset.steps;
+    const sd = document.getElementById('stepdots'); sd.innerHTML = '';
+    for (let k = 0; k < n; k++) { const d = document.createElement('i'); if (k <= step) d.className = 'on'; sd.appendChild(d); }
+    document.getElementById('prev').disabled = cur === 0 && step === 0;
+    document.getElementById('next').textContent = (cur === scenes.length - 1 && step === n - 1) ? 'End' : 'Next →';
+    document.getElementById('notesLabel').textContent = 'Speaker notes · ' + names[cur];
+    document.getElementById('notesText').textContent = notes[cur];
+    effects(cur, step);
+    try { history.replaceState(null, '', '#' + sc0.dataset.key); } catch (e) {}
+  }
+  function go(i, s) { cur = Math.max(0, Math.min(scenes.length - 1, i)); step = s; document.getElementById('stage').scrollTop = 0; render(); }
+  function next() {
+    const n = +scenes[cur].dataset.steps;
+    if (step < n - 1) { step++; render(); } else if (cur < scenes.length - 1) go(cur + 1, 0);
+  }
+  function prev() {
+    if (step > 0) { step--; render(); } else if (cur > 0) go(cur - 1, +scenes[cur - 1].dataset.steps - 1);
+  }
+  document.getElementById('next').addEventListener('click', next);
+  document.getElementById('prev').addEventListener('click', prev);
+
+  const notesEl = document.getElementById('notes');
+
+  document.addEventListener('keydown', e => {
+    if (e.target.closest && e.target.closest('input,textarea')) return;
+    const k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown' || k === ' ') { e.preventDefault(); next(); }
+    else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); prev(); }
+    else if (k.toLowerCase() === 'n') notesEl.hidden = !notesEl.hidden;
+    else if (k.toLowerCase() === 'r') go(scenes.length - 1, 0);
+    else if (k === 'Home') go(0, 0);
+    else if (/^[1-7]$/.test(k)) go(+k - 1, 0);
+  });
+
+  // swipe on touch
+  let sx = null;
+  const stage = document.getElementById('stage');
+  stage.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+  stage.addEventListener('touchend', e => { if (sx === null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 60) (dx < 0 ? next : prev)(); sx = null; });
+
+  const start = scenes.findIndex(s => '#' + s.dataset.key === location.hash);
+  go(start > 0 ? start : 0, 0);
+})();
+</script>
+
+</body></html>
